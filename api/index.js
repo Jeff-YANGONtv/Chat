@@ -99,9 +99,11 @@ async function tgGetFile(token, fileId) {
 }
 
 const ALLOWED_COLS = new Set([
-  'channel_name','telegram_link','logo_url',
+  'channel_name','telegram_link','logo_url','address',
   'ads1','ads1_fees','ads1_duration','ads1_posts',
   'ads2','ads2_fees','ads2_duration','ads2_posts',
+  'ads3','ads3_fees','ads3_duration','ads3_posts',
+  'ads4','ads4_fees','ads4_duration','ads4_posts',
   'payment_method','telegram_file_id','media_backup_url',
 ]);
 
@@ -214,10 +216,10 @@ module.exports = async (req, res) => {
 
     // ---------- WALLET SUMMARY ----------
     if (path === '/api/wallet-summary' && req.method === 'GET') {
-      const { data, error } = await supabase.from('ads_management').select('ads1_fees, ads2_fees');
+      const { data, error } = await supabase.from('ads_management').select('ads1_fees, ads2_fees, ads3_fees, ads4_fees');
       if (error) return json(res, 500, { error: error.message });
       const total = (data || []).reduce((a, r) =>
-        a + Number(r.ads1_fees || 0) + Number(r.ads2_fees || 0), 0);
+        a + Number(r.ads1_fees || 0) + Number(r.ads2_fees || 0) + Number(r.ads3_fees || 0) + Number(r.ads4_fees || 0), 0);
       return json(res, 200, { total, count: data?.length || 0 });
     }
 
@@ -225,7 +227,7 @@ module.exports = async (req, res) => {
     if (path === '/api/wallet-history' && req.method === 'GET') {
       const { data, error } = await supabase
         .from('ads_management')
-        .select('id, channel_name, ads1, ads1_fees, ads2, ads2_fees, updated_at')
+        .select('id, channel_name, ads1, ads1_fees, ads2, ads2_fees, ads3, ads3_fees, ads4, ads4_fees, updated_at')
         .order('updated_at', { ascending: false });
       if (error) return json(res, 500, { error: error.message });
       return json(res, 200, data || []);

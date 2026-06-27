@@ -159,7 +159,7 @@
         <div>
           <div class="text-[12px] opacity-80">Total Active Revenue</div>
           <div class="text-3xl font-extrabold mt-1" id="walletTotal">—</div>
-          <div class="text-[11px] opacity-80 mt-1"><span id="walletCount">0</span> channels · ads1 + ads2</div>
+          <div class="text-[11px] opacity-80 mt-1"><span id="walletCount">0</span> channels · All ads</div>
         </div>
         <button onclick="openWalletHistory()" class="bg-white/20 hover:bg-white/30 text-white text-xs px-3 py-2 rounded-lg transition">View History</button>
       </div>
@@ -200,14 +200,11 @@
           <p id="detailLink" class="text-[11px] text-[#8a9aa9] truncate"></p>
         </div>
       </div>
-      <div class="space-y-2 mb-4">
-        <div class="bg-[#1c2733] rounded-xl px-4 py-3 flex items-center justify-between">
-          <div><div class="text-[11px] text-[#8a9aa9]">Ads 1</div><div id="detailAds1" class="text-sm font-semibold">—</div></div>
-          <div class="text-right"><div class="text-[11px] text-[#8a9aa9]">Fee</div><div id="detailAds1Fee" class="text-sm font-semibold">0</div></div>
-        </div>
-        <div class="bg-[#1c2733] rounded-xl px-4 py-3 flex items-center justify-between">
-          <div><div class="text-[11px] text-[#8a9aa9]">Ads 2</div><div id="detailAds2" class="text-sm font-semibold">—</div></div>
-          <div class="text-right"><div class="text-[11px] text-[#8a9aa9]">Fee</div><div id="detailAds2Fee" class="text-sm font-semibold">0</div></div>
+      <div class="space-y-2 mb-4 max-h-[300px] overflow-y-auto pr-1 scrollbar-hide">
+        <div id="detailAdsGrid" class="grid grid-cols-1 gap-2"></div>
+        <div class="bg-[#1c2733] rounded-xl px-4 py-3">
+          <div class="text-[11px] text-[#8a9aa9]">Address</div>
+          <div id="detailAddress" class="text-sm font-semibold">—</div>
         </div>
         <div class="bg-[#1c2733] rounded-xl px-4 py-3">
           <div class="text-[11px] text-[#8a9aa9]">Payment</div>
@@ -246,13 +243,14 @@
     </div>
   </div>
   <div class="overflow-auto h-[calc(100vh-56px)]">
-    <table id="sheetTable" class="text-xs min-w-[1400px] border-collapse">
+    <table id="sheetTable" class="text-xs min-w-[2000px] border-collapse">
       <thead>
         <tr>
           <th class="sheet-th">#</th>
           <th class="sheet-th">Channel Name</th>
           <th class="sheet-th">Telegram Link</th>
           <th class="sheet-th">Logo URL</th>
+          <th class="sheet-th">Address</th>
           <th class="sheet-th">Ads 1 Name</th>
           <th class="sheet-th">Ads 1 Fees</th>
           <th class="sheet-th">Ads 1 Duration</th>
@@ -261,8 +259,16 @@
           <th class="sheet-th">Ads 2 Fees</th>
           <th class="sheet-th">Ads 2 Duration</th>
           <th class="sheet-th">Ads 2 Posts</th>
+          <th class="sheet-th">Ads 3 Name</th>
+          <th class="sheet-th">Ads 3 Fees</th>
+          <th class="sheet-th">Ads 3 Duration</th>
+          <th class="sheet-th">Ads 3 Posts</th>
+          <th class="sheet-th">Ads 4 Name</th>
+          <th class="sheet-th">Ads 4 Fees</th>
+          <th class="sheet-th">Ads 4 Duration</th>
+          <th class="sheet-th">Ads 4 Posts</th>
           <th class="sheet-th">Payment Method</th>
-          <th class="sheet-th">Media Upload</th>
+          <th class="sheet-th">Telegram Media</th>
           <th class="sheet-th">Actions</th>
         </tr>
       </thead>
@@ -271,164 +277,38 @@
   </div>
 </div>
 
-<div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] bg-[#1c2733] border border-[#2ea6ff]/40 px-4 py-2 rounded-xl text-sm shadow-lg"></div>
-
 <script>
-'use strict';
-
-const tg = window.Telegram?.WebApp;
-if (tg) {
-  tg.ready(); tg.expand();
-  tg.setHeaderColor('#17212b');
-  tg.setBackgroundColor('#0f1419');
-  const u = tg.initDataUnsafe?.user;
-  if (u) {
-    document.getElementById('drawerName').textContent = `${u.first_name||''} ${u.last_name||''}`.trim() || 'Admin';
-    document.getElementById('drawerHandle').textContent = u.username ? '@'+u.username : '';
-    document.getElementById('drawerAvatar').textContent = (u.first_name||'A')[0].toUpperCase();
-  }
-}
-
-const API = '';
-async function api(path, opts = {}) {
-  const res = await fetch(API + path, {
-    headers: { 'Content-Type': 'application/json' },
-    ...opts,
-  });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
-}
-
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.remove('hidden');
-  clearTimeout(window.__toast);
-  window.__toast = setTimeout(()=>t.classList.add('hidden'), 1800);
-}
-function avatarColor(seed) {
-  const colors = ['#2ea6ff','#5288c1','#f59e0b','#10b981','#ef4444','#8b5cf6','#ec4899','#14b8a6'];
-  let h = 0;
-  for (let i=0; i<seed.length; i++) h = (h*31 + seed.charCodeAt(i)) >>> 0;
-  return colors[h % colors.length];
-}
-function initials(name) {
-  const parts = (name||'?').trim().split(/\s+/);
-  return ((parts[0]?.[0]||'') + (parts[1]?.[0]||'')).toUpperCase() || '?';
-}
-function timeAgo(ts) {
-  const s = Math.floor((Date.now() - new Date(ts).getTime())/1000);
-  if (s < 60) return 'now';
-  if (s < 3600) return Math.floor(s/60)+'m';
-  if (s < 86400) return Math.floor(s/3600)+'h';
-  return Math.floor(s/86400)+'d';
-}
-function escapeHtml(s) {
-  return String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-}
+const tg = window.Telegram.WebApp;
+tg.expand();
+tg.ready();
 
 let currentTab = 'private';
+let adsCache = [];
+let currentPage = 0;
+const ITEMS_PER_PAGE = 8;
+let TOTAL_PAGES = 0;
 let currentChat = null;
 
-function switchTab(tab) {
-  currentTab = tab;
-  document.getElementById('tab-private').className =
-    `flex-1 py-2 rounded-xl text-sm font-semibold transition ${tab==='private' ? 'bg-[#2ea6ff] text-white' : 'bg-[#1c2733] text-[#8a9aa9]'}`;
-  document.getElementById('tab-group').className =
-    `flex-1 py-2 rounded-xl text-sm font-semibold transition ${tab==='group' ? 'bg-[#2ea6ff] text-white' : 'bg-[#1c2733] text-[#8a9aa9]'}`;
-  loadChats();
+async function api(path, opts={}) {
+  const r = await fetch(path, opts);
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
 }
 
-async function loadChats() {
-  const list = document.getElementById('chatList');
-  list.innerHTML = `
-    <div class="px-4 py-3"><div class="shimmer h-14 rounded-xl"></div></div>
-    <div class="px-4 py-3"><div class="shimmer h-14 rounded-xl"></div></div>
-    <div class="px-4 py-3"><div class="shimmer h-14 rounded-xl"></div></div>`;
-  try {
-    const chats = await api(`/api/chats?type=${currentTab}`);
-    if (!chats.length) {
-      list.innerHTML = '';
-      document.getElementById('emptyState').classList.remove('hidden');
-      return;
-    }
-    document.getElementById('emptyState').classList.add('hidden');
-    list.innerHTML = chats.map(c => `
-      <div onclick='openChat(${JSON.stringify(c).replace(/'/g,"&#39;")})' class="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-[#17212b] transition">
-        <div class="w-12 h-12 rounded-full flex items-center justify-center font-bold flex-shrink-0" style="background:${avatarColor(c.chat_id)}">${initials(c.customer_name)}</div>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center justify-between">
-            <div class="font-semibold text-sm truncate">${escapeHtml(c.customer_name||'Unknown')}</div>
-            <div class="text-[10px] text-[#8a9aa9]">${timeAgo(c.updated_at)}</div>
-          </div>
-          <div class="flex items-center justify-between">
-            <div class="text-[12px] text-[#8a9aa9] truncate">${escapeHtml(c.last_message||'')}</div>
-            ${c.unread_count>0 ? `<span class="ml-2 bg-[#2ea6ff] text-white text-[10px] rounded-full px-2 py-0.5">${c.unread_count}</span>` : ''}
-          </div>
-          <div class="text-[10px] text-[#5288c1] mt-0.5">${(c.bot_source||'').toUpperCase()} · ${c.username?'@'+c.username:''}</div>
-        </div>
-      </div>
-    `).join('');
-  } catch (e) {
-    list.innerHTML = `<div class="px-4 py-8 text-center text-red-400 text-sm">Failed to load: ${e.message}</div>`;
-  }
+function toast(m) { tg.showAlert(m); }
+function escapeHtml(s) { if(!s) return ''; return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function initials(n) { return (n||'').split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase(); }
+function avatarColor(n) {
+  const colors = ['#2ea6ff','#5288c1','#6b7c93','#4a90e2','#357abd'];
+  let hash = 0; for(let i=0; i<(n||'').length; i++) hash = (n.charCodeAt(i) + ((hash << 5) - hash));
+  return colors[Math.abs(hash) % colors.length];
 }
-
-async function openChat(chatObj) {
-  currentChat = typeof chatObj === 'string' ? JSON.parse(chatObj) : chatObj;
-  document.getElementById('chatHeaderName').textContent = currentChat.customer_name || 'Unknown';
-  document.getElementById('chatHeaderMeta').textContent = `${(currentChat.bot_source||'').toUpperCase()} · ${currentChat.username?'@'+currentChat.username:'No username'}`;
-  document.getElementById('chatHeaderAvatar').textContent = initials(currentChat.customer_name);
-  document.getElementById('chatHeaderAvatar').style.background = avatarColor(currentChat.chat_id);
-  document.getElementById('chatWindow').classList.remove('hidden');
-  await loadMessages(currentChat.chat_id);
-  pollMessagesStart();
-}
-function closeChat() {
-  document.getElementById('chatWindow').classList.add('hidden');
-  currentChat = null;
-  pollMessagesStop();
-  loadChats();
-}
-
-async function loadMessages(chatId) {
-  const scroll = document.getElementById('messagesScroll');
-  if (!scroll.dataset.loaded) scroll.innerHTML = `<div class="text-center text-[#8a9aa9] text-xs py-8">Loading…</div>`;
-  try {
-    const msgs = await api(`/api/messages/${encodeURIComponent(chatId)}`);
-    scroll.dataset.loaded = '1';
-    scroll.innerHTML = msgs.map(m => {
-      const isAdmin = m.sender === 'admin';
-      return `<div class="flex ${isAdmin?'justify-end':'justify-start'}">
-        <div class="max-w-[78%] ${isAdmin?'bubble-out':'bubble-in'} px-3 py-2">
-          <div class="text-sm whitespace-pre-wrap break-words">${escapeHtml(m.message_text)}</div>
-          <div class="text-[10px] opacity-60 mt-1 text-right">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
-        </div>
-      </div>`;
-    }).join('');
-    scroll.scrollTop = scroll.scrollHeight;
-  } catch (e) {
-    scroll.innerHTML = `<div class="text-center text-red-400 text-sm py-8">Failed: ${e.message}</div>`;
-  }
-}
-
-let pollTimer = null;
-function pollMessagesStart() {
-  pollMessagesStop();
-  pollTimer = setInterval(() => { if (currentChat) loadMessages(currentChat.chat_id); }, 4000);
-}
-function pollMessagesStop() { if (pollTimer) clearInterval(pollTimer); pollTimer = null; }
-
-async function sendReply(ev) {
-  ev.preventDefault();
-  const inp = document.getElementById('replyInput');
-  const text = inp.value.trim();
-  if (!text || !currentChat) return;
-  inp.value = '';
-  try {
-    await api('/api/send-message', { method:'POST', body: JSON.stringify({ chat_id: currentChat.chat_id, message_text: text }) });
-    await loadMessages(currentChat.chat_id);
-  } catch (e) { toast('Send failed: ' + e.message); }
+function timeAgo(d) {
+  const s = Math.floor((new Date() - new Date(d)) / 1000);
+  if(s < 60) return 'just now';
+  if(s < 3600) return Math.floor(s/60) + 'm ago';
+  if(s < 86400) return Math.floor(s/3600) + 'h ago';
+  return Math.floor(s/86400) + 'd ago';
 }
 
 function toggleDrawer(open) {
@@ -436,76 +316,136 @@ function toggleDrawer(open) {
   document.getElementById('drawerBackdrop').classList.toggle('show', open);
 }
 
-function openAdminGate() {
-  toggleDrawer(false);
-  document.getElementById('adminGate').classList.remove('hidden');
-  setTimeout(()=>document.getElementById('adminPwd').focus(), 100);
+function switchTab(t) {
+  currentTab = t;
+  document.getElementById('tab-private').className = `flex-1 py-2 rounded-xl text-sm font-semibold transition ${t==='private'?'bg-[#2ea6ff] text-white':'bg-[#1c2733] text-[#8a9aa9]'}`;
+  document.getElementById('tab-group').className = `flex-1 py-2 rounded-xl text-sm font-semibold transition ${t==='group'?'bg-[#2ea6ff] text-white':'bg-[#1c2733] text-[#8a9aa9]'}`;
+  loadChats();
 }
-function closeAdminGate() {
-  document.getElementById('adminGate').classList.add('hidden');
-  document.getElementById('adminPwd').value = '';
-  document.getElementById('adminErr').classList.add('hidden');
+
+async function loadChats() {
+  try {
+    const chats = await api(`/api/chats?type=${currentTab}`);
+    const list = document.getElementById('chatList');
+    document.getElementById('emptyState').classList.toggle('hidden', chats.length > 0);
+    list.innerHTML = chats.map(c => `
+      <div onclick="openChat('${c.chat_id}')" class="flex items-center gap-3 px-4 py-3 hover:bg-[#1c2733] transition cursor-pointer">
+        <div class="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg" style="background:${avatarColor(c.customer_name)}">${initials(c.customer_name)}</div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between mb-0.5">
+            <span class="font-semibold text-sm truncate">${escapeHtml(c.customer_name)}</span>
+            <span class="text-[10px] text-[#8a9aa9]">${timeAgo(c.updated_at)}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <p class="text-[12px] text-[#8a9aa9] truncate pr-4">${escapeHtml(c.last_message)}</p>
+            ${c.unread_count > 0 ? `<span class="bg-[#2ea6ff] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">${c.unread_count}</span>` : ''}
+          </div>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) { console.error(e); }
 }
+
+async function openChat(id) {
+  currentChat = id;
+  const list = await api(`/api/chats?type=${currentTab}`);
+  const c = list.find(x=>x.chat_id === id);
+  document.getElementById('chatHeaderName').textContent = c.customer_name;
+  document.getElementById('chatHeaderMeta').textContent = c.username ? '@'+c.username : c.chat_id;
+  document.getElementById('chatHeaderAvatar').textContent = initials(c.customer_name);
+  document.getElementById('chatHeaderAvatar').style.background = avatarColor(c.customer_name);
+  document.getElementById('chatWindow').classList.remove('hidden');
+  loadMessages(id);
+}
+
+function closeChat() { currentChat = null; document.getElementById('chatWindow').classList.add('hidden'); loadChats(); }
+
+async function loadMessages(id) {
+  try {
+    const msgs = await api(`/api/messages/${encodeURIComponent(id)}`);
+    const scroll = document.getElementById('messagesScroll');
+    scroll.innerHTML = msgs.map(m => {
+      const isAdmin = m.sender === 'admin';
+      return `
+        <div class="flex ${isAdmin?'justify-end':'justify-start'}">
+          <div class="max-w-[85%] px-3.5 py-2 text-sm shadow-sm ${isAdmin?'bubble-out':'bubble-in'}">
+            <div>${escapeHtml(m.message_text)}</div>
+            <div class="text-[9px] opacity-60 text-right mt-1">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>
+          </div>
+        </div>`;
+    }).join('');
+    scroll.scrollTop = scroll.scrollHeight;
+  } catch(e) { console.error(e); }
+}
+
+async function sendReply(e) {
+  e.preventDefault();
+  const input = document.getElementById('replyInput');
+  const txt = input.value.trim();
+  if(!txt || !currentChat) return;
+  input.value = '';
+  try {
+    await api('/api/send-message', { method:'POST', body: JSON.stringify({ chat_id: currentChat, message_text: txt }) });
+    loadMessages(currentChat);
+  } catch(e) { toast('Send failed'); }
+}
+
+function openAdminGate() { toggleDrawer(false); document.getElementById('adminGate').classList.remove('hidden'); setTimeout(()=>document.getElementById('adminPwd').focus(), 100); }
+function closeAdminGate() { document.getElementById('adminGate').classList.add('hidden'); document.getElementById('adminPwd').value = ''; document.getElementById('adminErr').classList.add('hidden'); }
 async function verifyAdmin() {
   const pwd = document.getElementById('adminPwd').value;
   try {
     const r = await api('/api/admin-auth', { method:'POST', body: JSON.stringify({ password: pwd }) });
-    if (r.ok) { closeAdminGate(); openAdminDash(); }
-    else throw new Error('bad');
+    if(r.ok) { closeAdminGate(); openAdminDash(); }
+    else { document.getElementById('adminErr').classList.remove('hidden'); }
   } catch { document.getElementById('adminErr').classList.remove('hidden'); }
 }
 
-let adsCache = [];
-let currentPage = 0;
-const PAGE_SIZE = 12;
-const TOTAL_PAGES = 3;
-
-async function openAdminDash() {
+function openAdminDash() {
   document.getElementById('adminDash').classList.remove('hidden');
-  await Promise.all([refreshWallet(), refreshAds()]);
+  refreshAds();
+  refreshWallet();
 }
 function closeAdminDash() { document.getElementById('adminDash').classList.add('hidden'); }
 
 async function refreshWallet() {
   try {
-    const r = await api('/api/wallet-summary');
-    document.getElementById('walletTotal').textContent = '$' + Number(r.total||0).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2});
-    document.getElementById('walletCount').textContent = r.count;
-  } catch { document.getElementById('walletTotal').textContent = 'Error'; }
+    const w = await api('/api/wallet-summary');
+    document.getElementById('walletTotal').textContent = '$' + Number(w.total||0).toFixed(2);
+    document.getElementById('walletCount').textContent = w.count;
+  } catch(e) {}
 }
 
 async function refreshAds() {
-  try { adsCache = await api('/api/ads'); renderGrid(); }
-  catch { toast('Load ads failed'); }
+  try {
+    adsCache = await api('/api/ads');
+    renderGrid();
+  } catch(e) {}
 }
 
 function renderGrid() {
   const track = document.getElementById('slideTrack');
-  const dots  = document.getElementById('dots');
+  const dots = document.getElementById('dots');
   track.innerHTML = ''; dots.innerHTML = '';
+  TOTAL_PAGES = Math.ceil(adsCache.length / ITEMS_PER_PAGE) || 1;
+  if(currentPage >= TOTAL_PAGES) currentPage = TOTAL_PAGES - 1;
 
-  for (let p=0; p<TOTAL_PAGES; p++) {
-    const pageRows = adsCache.slice(p*PAGE_SIZE, p*PAGE_SIZE + PAGE_SIZE);
+  for(let p=0; p<TOTAL_PAGES; p++) {
     const page = document.createElement('div');
-    page.className = 'slide-page p-3 grid grid-cols-3 gap-2';
-
-    for (let i=0; i<PAGE_SIZE; i++) {
-      const row = pageRows[i];
-      if (!row) {
-        page.innerHTML += `<div class="aspect-[3/4] rounded-xl bg-[#1c2733]/40 border border-dashed border-[#232e3c]"></div>`;
-        continue;
-      }
+    page.className = 'slide-page grid grid-cols-2 gap-3 p-4';
+    const items = adsCache.slice(p*ITEMS_PER_PAGE, (p+1)*ITEMS_PER_PAGE);
+    for(const row of items) {
+      const bg = avatarColor(row.channel_name);
       const ini = initials(row.channel_name);
-      const bg  = avatarColor(row.channel_name);
-      const logo = row.logo_url
-        ? `<img src="${escapeHtml(row.logo_url)}" alt="" class="w-full h-full object-cover" onerror="this.outerHTML='<div class=&quot;w-full h-full flex items-center justify-center text-white font-bold text-lg&quot; style=&quot;background:${bg}&quot;>${ini}</div>'">`
+      const logo = row.logo_url 
+        ? `<img src="${escapeHtml(row.logo_url)}" alt="" class="w-full h-full object-cover" onerror="this.parentNode.innerHTML='<div class=\'w-full h-full flex items-center justify-center text-white font-bold text-lg\' style=\'background:${bg}\'>${ini}</div>'">`
         : `<div class="w-full h-full flex items-center justify-center text-white font-bold text-lg" style="background:${bg}">${ini}</div>`;
       page.innerHTML += `
         <div onclick="openDetail(${row.id})" class="aspect-[3/4] rounded-xl bg-[#1c2733] overflow-hidden cursor-pointer hover:scale-[1.03] transition border border-[#232e3c]">
           <div class="h-3/5 overflow-hidden">${logo}</div>
           <div class="p-2">
             <div class="text-[11px] font-semibold truncate">${escapeHtml(row.channel_name)}</div>
-            <div class="text-[10px] text-[#2ea6ff] mt-0.5">$${(Number(row.ads1_fees||0)+Number(row.ads2_fees||0)).toFixed(0)}</div>
+            <div class="text-[10px] text-[#2ea6ff] mt-0.5">$${(Number(row.ads1_fees||0)+Number(row.ads2_fees||0)+Number(row.ads3_fees||0)+Number(row.ads4_fees||0)).toFixed(0)}</div>
           </div>
         </div>`;
     }
@@ -536,12 +476,23 @@ async function openDetail(id) {
   if (!row) return;
   document.getElementById('detailName').textContent = row.channel_name;
   document.getElementById('detailLink').textContent = row.telegram_link || '';
-  document.getElementById('detailAds1').textContent = row.ads1 || '—';
-  document.getElementById('detailAds1Fee').textContent = '$' + Number(row.ads1_fees||0).toFixed(2);
-  document.getElementById('detailAds2').textContent = row.ads2 || '—';
-  document.getElementById('detailAds2Fee').textContent = '$' + Number(row.ads2_fees||0).toFixed(2);
+  document.getElementById('detailAddress').textContent = row.address || '—';
   document.getElementById('detailPayment').textContent = row.payment_method || '—';
   document.getElementById('detailViewBtn').href = row.telegram_link || '#';
+
+  const grid = document.getElementById('detailAdsGrid');
+  grid.innerHTML = '';
+  for(let i=1; i<=4; i++) {
+    const name = row[`ads${i}`];
+    const fee = row[`ads${i}_fees`];
+    if(name || fee) {
+      grid.innerHTML += `
+        <div class="bg-[#1c2733] rounded-xl px-4 py-3 flex items-center justify-between">
+          <div><div class="text-[11px] text-[#8a9aa9]">Ads ${i}</div><div class="text-sm font-semibold">${escapeHtml(name||'—')}</div></div>
+          <div class="text-right"><div class="text-[11px] text-[#8a9aa9]">Fee</div><div class="text-sm font-semibold">$${Number(fee||0).toFixed(2)}</div></div>
+        </div>`;
+    }
+  }
 
   const logo = document.getElementById('detailLogo');
   if (row.logo_url) {
@@ -578,7 +529,7 @@ async function openWalletHistory() {
   try {
     const rows = await api('/api/wallet-history');
     list.innerHTML = rows.map(r => {
-      const sum = Number(r.ads1_fees||0)+Number(r.ads2_fees||0);
+      const sum = Number(r.ads1_fees||0)+Number(r.ads2_fees||0)+Number(r.ads3_fees||0)+Number(r.ads4_fees||0);
       return `<div class="bg-[#1c2733] rounded-xl p-3 flex items-center justify-between">
         <div class="min-w-0">
           <div class="font-semibold text-sm truncate">${escapeHtml(r.channel_name)}</div>
@@ -605,6 +556,7 @@ function renderSheet() {
       <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.channel_name||'')}" onchange="updateCellDatabase(${r.id},'channel_name',this.value)"></td>
       <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.telegram_link||'')}" onchange="updateCellDatabase(${r.id},'telegram_link',this.value)"></td>
       <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.logo_url||'')}" onchange="updateCellDatabase(${r.id},'logo_url',this.value)"></td>
+      <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.address||'')}" onchange="updateCellDatabase(${r.id},'address',this.value)"></td>
       <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.ads1||'')}" onchange="updateCellDatabase(${r.id},'ads1',this.value)"></td>
       <td class="sheet-cell"><input class="sheet-input" type="number" value="${r.ads1_fees||0}" onchange="updateCellDatabase(${r.id},'ads1_fees',this.value)"></td>
       <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.ads1_duration||'')}" onchange="updateCellDatabase(${r.id},'ads1_duration',this.value)"></td>
@@ -613,6 +565,14 @@ function renderSheet() {
       <td class="sheet-cell"><input class="sheet-input" type="number" value="${r.ads2_fees||0}" onchange="updateCellDatabase(${r.id},'ads2_fees',this.value)"></td>
       <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.ads2_duration||'')}" onchange="updateCellDatabase(${r.id},'ads2_duration',this.value)"></td>
       <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.ads2_posts||'')}" onchange="updateCellDatabase(${r.id},'ads2_posts',this.value)"></td>
+      <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.ads3||'')}" onchange="updateCellDatabase(${r.id},'ads3',this.value)"></td>
+      <td class="sheet-cell"><input class="sheet-input" type="number" value="${r.ads3_fees||0}" onchange="updateCellDatabase(${r.id},'ads3_fees',this.value)"></td>
+      <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.ads3_duration||'')}" onchange="updateCellDatabase(${r.id},'ads3_duration',this.value)"></td>
+      <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.ads3_posts||'')}" onchange="updateCellDatabase(${r.id},'ads3_posts',this.value)"></td>
+      <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.ads4||'')}" onchange="updateCellDatabase(${r.id},'ads4',this.value)"></td>
+      <td class="sheet-cell"><input class="sheet-input" type="number" value="${r.ads4_fees||0}" onchange="updateCellDatabase(${r.id},'ads4_fees',this.value)"></td>
+      <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.ads4_duration||'')}" onchange="updateCellDatabase(${r.id},'ads4_duration',this.value)"></td>
+      <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.ads4_posts||'')}" onchange="updateCellDatabase(${r.id},'ads4_posts',this.value)"></td>
       <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.payment_method||'')}" onchange="updateCellDatabase(${r.id},'payment_method',this.value)"></td>
       <td class="sheet-cell px-2 py-1">
         <div class="flex items-center gap-1">
