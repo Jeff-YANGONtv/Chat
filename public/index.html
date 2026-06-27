@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>JB Hub — Ad Network & Live Chat</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root {
+    --tg-bg:        #0f1419;
+    --tg-bg-2:      #17212b;
+    --tg-bg-3:      #1c2733;
+    --tg-accent:    #2ea6ff;
+    --tg-accent-2:  #5288c1;
+    --tg-text:      #ffffff;
+    --tg-text-dim:  #8a9aa9;
+    --tg-divider:   #232e3c;
+    --tg-bubble-in: #182533;
+    --tg-bubble-out:#2b5278;
+  }
+  * { -webkit-tap-highlight-color: transparent; }
+  html, body {
+    background: var(--tg-bg);
+    color: var(--tg-text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow-x: hidden;
+  }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  .drawer { transform: translateX(100%); transition: transform .3s ease; }
+  .drawer.open { transform: translateX(0); }
+  .backdrop { opacity: 0; pointer-events: none; transition: opacity .3s; }
+  .backdrop.show { opacity: 1; pointer-events: auto; }
+  .slide-track { display: flex; transition: transform .4s cubic-bezier(.25,.8,.25,1); }
+  .slide-page { flex: 0 0 100%; }
+  @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+  .shimmer {
+    background: linear-gradient(90deg, #1c2733 0%, #243240 50%, #1c2733 100%);
+    background-size: 800px 100%;
+    animation: shimmer 1.4s linear infinite;
+  }
+  .sheet-input {
+    background: transparent; border: 1px solid transparent;
+    width: 100%; padding: 6px 8px; color: #fff; font-size: 12px;
+  }
+  .sheet-input:focus { background:#17212b; border-color: var(--tg-accent); outline: none; }
+  .sheet-cell { border: 1px solid var(--tg-divider); padding: 0; vertical-align: middle; }
+  .sheet-th  { background:#17212b; color:#8a9aa9; font-weight:600; font-size:11px; padding:8px; border:1px solid var(--tg-divider); position: sticky; top: 0; z-index: 5; }
+  .bubble-in  { background: var(--tg-bubble-in); border-radius: 14px 14px 14px 4px; }
+  .bubble-out { background: var(--tg-bubble-out); border-radius: 14px 14px 4px 14px; }
+  .fade-in { animation: fadeIn .25s ease; }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(6px);} to { opacity:1; transform:none;} }
+</style>
+</head>
+<body class="min-h-screen">
+
+<header class="sticky top-0 z-30 bg-[#17212b] border-b border-[#232e3c]">
+  <div class="flex items-center justify-between px-4 py-3">
+    <div class="flex items-center gap-2">
+      <div class="w-9 h-9 rounded-full bg-gradient-to-br from-[#2ea6ff] to-[#5288c1] flex items-center justify-center font-bold">JB</div>
+      <div>
+        <div class="text-sm font-semibold">JB Hub</div>
+        <div class="text-[11px] text-[#8a9aa9]" id="onlineStatus">Live chat router</div>
+      </div>
+    </div>
+    <button onclick="toggleDrawer(true)" class="w-10 h-10 rounded-full bg-[#1c2733] flex items-center justify-center hover:bg-[#243240] transition">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>
+    </button>
+  </div>
+  <div class="flex px-4 pb-3 gap-2">
+    <button id="tab-private" onclick="switchTab('private')" class="flex-1 py-2 rounded-xl bg-[#2ea6ff] text-white text-sm font-semibold transition">👤 Clients</button>
+    <button id="tab-group" onclick="switchTab('group')" class="flex-1 py-2 rounded-xl bg-[#1c2733] text-[#8a9aa9] text-sm font-semibold transition">👥 Groups</button>
+  </div>
+</header>
+
+<main id="inboxView" class="pb-20">
+  <div id="chatList" class="divide-y divide-[#232e3c]"></div>
+  <div id="emptyState" class="hidden text-center py-20 text-[#8a9aa9]">
+    <div class="text-5xl mb-3">💬</div>
+    <div>No conversations yet</div>
+  </div>
+</main>
+
+<div id="chatWindow" class="hidden fixed inset-0 z-40 bg-[#0f1419] flex flex-col">
+  <div class="flex items-center gap-3 px-4 py-3 bg-[#17212b] border-b border-[#232e3c]">
+    <button onclick="closeChat()" class="w-9 h-9 rounded-full bg-[#1c2733] flex items-center justify-center">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div id="chatHeaderAvatar" class="w-10 h-10 rounded-full bg-gradient-to-br from-[#2ea6ff] to-[#5288c1] flex items-center justify-center font-bold"></div>
+    <div class="flex-1 min-w-0">
+      <div id="chatHeaderName" class="text-sm font-semibold truncate"></div>
+      <div id="chatHeaderMeta" class="text-[11px] text-[#8a9aa9] truncate"></div>
+    </div>
+  </div>
+  <div id="messagesScroll" class="flex-1 overflow-y-auto px-3 py-3 space-y-2 scrollbar-hide"></div>
+  <form id="replyForm" class="flex items-center gap-2 px-3 py-3 bg-[#17212b] border-t border-[#232e3c]" onsubmit="sendReply(event)">
+    <input id="replyInput" type="text" placeholder="Write a message…" class="flex-1 bg-[#1c2733] border border-[#232e3c] rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#2ea6ff]">
+    <button type="submit" class="w-11 h-11 rounded-full bg-[#2ea6ff] hover:bg-[#1f8de0] flex items-center justify-center transition">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </form>
+</div>
+
+<div id="drawerBackdrop" class="backdrop fixed inset-0 z-40 bg-black/60" onclick="toggleDrawer(false)"></div>
+<aside id="drawer" class="drawer fixed top-0 right-0 z-50 h-full w-72 bg-[#17212b] border-l border-[#232e3c] p-5">
+  <div class="flex items-center gap-3 mb-6 pt-2">
+    <div class="w-14 h-14 rounded-full bg-gradient-to-br from-[#2ea6ff] to-[#5288c1] flex items-center justify-center font-bold text-xl" id="drawerAvatar">A</div>
+    <div>
+      <div id="drawerName" class="font-semibold">Admin</div>
+      <div class="text-[11px] text-[#8a9aa9]" id="drawerHandle">@jbhub</div>
+    </div>
+  </div>
+  <div class="space-y-2">
+    <button onclick="openAdminGate()" class="w-full flex items-center gap-3 bg-[#1c2733] hover:bg-[#243240] rounded-xl px-4 py-3 text-sm transition">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2ea6ff" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Open Admin Dashboard
+    </button>
+    <button onclick="toggleDrawer(false)" class="w-full flex items-center gap-3 bg-[#1c2733] hover:bg-[#243240] rounded-xl px-4 py-3 text-sm transition">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a9aa9" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      Close
+    </button>
+  </div>
+  <div class="absolute bottom-5 left-5 right-5 text-[11px] text-[#8a9aa9] text-center">v1.0 · Powered by Telegram WebApp</div>
+</aside>
+
+<div id="adminGate" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center px-4">
+  <div class="bg-[#17212b] rounded-2xl p-6 w-full max-w-sm border border-[#232e3c]">
+    <div class="text-center mb-4">
+      <div class="w-14 h-14 mx-auto rounded-full bg-[#2ea6ff]/20 flex items-center justify-center mb-3">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2ea6ff" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <h2 class="text-lg font-bold">Admin Access</h2>
+      <p class="text-[12px] text-[#8a9aa9]">Enter password to continue</p>
+    </div>
+    <input id="adminPwd" type="password" placeholder="Password" class="w-full bg-[#1c2733] border border-[#232e3c] rounded-xl px-4 py-3 text-sm mb-3 focus:outline-none focus:border-[#2ea6ff]" onkeydown="if(event.key==='Enter') verifyAdmin()">
+    <div id="adminErr" class="hidden text-red-400 text-[12px] mb-2">Incorrect password</div>
+    <div class="flex gap-2">
+      <button onclick="closeAdminGate()" class="flex-1 py-2.5 rounded-xl bg-[#1c2733] text-sm">Cancel</button>
+      <button onclick="verifyAdmin()" class="flex-1 py-2.5 rounded-xl bg-[#2ea6ff] text-sm font-semibold">Unlock</button>
+    </div>
+  </div>
+</div>
+
+<div id="adminDash" class="hidden fixed inset-0 z-40 bg-[#0f1419] overflow-y-auto">
+  <header class="sticky top-0 z-10 bg-[#17212b] border-b border-[#232e3c] px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <button onclick="closeAdminDash()" class="w-9 h-9 rounded-full bg-[#1c2733] flex items-center justify-center">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <h1 class="font-bold">Admin Dashboard</h1>
+    </div>
+    <button onclick="openSpreadsheet()" class="bg-[#2ea6ff] hover:bg-[#1f8de0] text-white text-xs font-semibold px-3 py-2 rounded-lg transition">📊 To Add Data</button>
+  </header>
+
+  <section class="p-4">
+    <div class="rounded-2xl bg-gradient-to-br from-[#2ea6ff] to-[#5288c1] p-5 shadow-lg">
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="text-[12px] opacity-80">Total Active Revenue</div>
+          <div class="text-3xl font-extrabold mt-1" id="walletTotal">—</div>
+          <div class="text-[11px] opacity-80 mt-1"><span id="walletCount">0</span> channels · ads1 + ads2</div>
+        </div>
+        <button onclick="openWalletHistory()" class="bg-white/20 hover:bg-white/30 text-white text-xs px-3 py-2 rounded-lg transition">View History</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="px-4">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="font-bold text-sm">Channels Inventory</h2>
+      <div id="pageIndicator" class="text-[12px] text-[#8a9aa9]">Page 1/3</div>
+    </div>
+    <div class="overflow-hidden rounded-2xl bg-[#17212b] border border-[#232e3c]">
+      <div id="slideTrack" class="slide-track"></div>
+    </div>
+    <div class="flex items-center justify-center gap-2 mt-4">
+      <button onclick="changePage(-1)" class="w-10 h-10 rounded-full bg-[#1c2733] hover:bg-[#243240] flex items-center justify-center">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div id="dots" class="flex gap-2"></div>
+      <button onclick="changePage(1)" class="w-10 h-10 rounded-full bg-[#1c2733] hover:bg-[#243240] flex items-center justify-center">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  </section>
+  <div class="h-10"></div>
+</div>
+
+<div id="detailModal" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center px-3">
+  <div class="bg-[#17212b] rounded-2xl w-full max-w-md border border-[#232e3c] overflow-hidden fade-in">
+    <div class="relative h-40 bg-[#1c2733]" id="detailBanner">
+      <div class="absolute inset-0 flex items-center justify-center text-[#8a9aa9] text-xs" id="detailBannerLoader">Loading media…</div>
+    </div>
+    <div class="p-5">
+      <div class="flex items-center gap-3 -mt-12 mb-4">
+        <div id="detailLogo" class="w-16 h-16 rounded-2xl border-4 border-[#17212b] bg-[#1c2733] overflow-hidden flex items-center justify-center font-bold text-xl"></div>
+        <div class="flex-1 mt-8 min-w-0">
+          <h3 id="detailName" class="font-bold truncate"></h3>
+          <p id="detailLink" class="text-[11px] text-[#8a9aa9] truncate"></p>
+        </div>
+      </div>
+      <div class="space-y-2 mb-4">
+        <div class="bg-[#1c2733] rounded-xl px-4 py-3 flex items-center justify-between">
+          <div><div class="text-[11px] text-[#8a9aa9]">Ads 1</div><div id="detailAds1" class="text-sm font-semibold">—</div></div>
+          <div class="text-right"><div class="text-[11px] text-[#8a9aa9]">Fee</div><div id="detailAds1Fee" class="text-sm font-semibold">0</div></div>
+        </div>
+        <div class="bg-[#1c2733] rounded-xl px-4 py-3 flex items-center justify-between">
+          <div><div class="text-[11px] text-[#8a9aa9]">Ads 2</div><div id="detailAds2" class="text-sm font-semibold">—</div></div>
+          <div class="text-right"><div class="text-[11px] text-[#8a9aa9]">Fee</div><div id="detailAds2Fee" class="text-sm font-semibold">0</div></div>
+        </div>
+        <div class="bg-[#1c2733] rounded-xl px-4 py-3">
+          <div class="text-[11px] text-[#8a9aa9]">Payment</div>
+          <div id="detailPayment" class="text-sm font-semibold">—</div>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="closeDetail()" class="flex-1 py-2.5 rounded-xl bg-[#1c2733] text-sm">Close</button>
+        <a id="detailViewBtn" href="#" target="_blank" class="flex-1 py-2.5 rounded-xl bg-[#2ea6ff] text-sm font-semibold text-center">View Channel</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="walletHistoryModal" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center px-3">
+  <div class="bg-[#17212b] rounded-2xl w-full max-w-md max-h-[80vh] border border-[#232e3c] flex flex-col">
+    <div class="flex items-center justify-between p-4 border-b border-[#232e3c]">
+      <h3 class="font-bold">Revenue History</h3>
+      <button onclick="closeWalletHistory()" class="w-8 h-8 rounded-full bg-[#1c2733]">✕</button>
+    </div>
+    <div id="walletHistoryList" class="flex-1 overflow-y-auto p-3 space-y-2 scrollbar-hide"></div>
+  </div>
+</div>
+
+<div id="spreadsheetModal" class="hidden fixed inset-0 z-50 bg-[#0f1419]">
+  <div class="flex items-center justify-between p-3 border-b border-[#232e3c] bg-[#17212b]">
+    <div class="flex items-center gap-2">
+      <button onclick="closeSpreadsheet()" class="w-9 h-9 rounded-full bg-[#1c2733]">
+        <svg class="mx-auto" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <h3 class="font-bold text-sm">Ads Management Spreadsheet</h3>
+    </div>
+    <div class="flex gap-2">
+      <button onclick="addRow()" class="bg-[#2ea6ff] text-white text-xs font-semibold px-3 py-2 rounded-lg">+ Add Row</button>
+      <span id="saveIndicator" class="text-[11px] text-[#8a9aa9] self-center"></span>
+    </div>
+  </div>
+  <div class="overflow-auto h-[calc(100vh-56px)]">
+    <table id="sheetTable" class="text-xs min-w-[1400px] border-collapse">
+      <thead>
+        <tr>
+          <th class="sheet-th">#</th>
+          <th class="sheet-th">Channel Name</th>
+          <th class="sheet-th">Telegram Link</th>
+          <th class="sheet-th">Logo URL</th>
+          <th class="sheet-th">Ads 1 Name</th>
+          <th class="sheet-th">Ads 1 Fees</th>
+          <th class="sheet-th">Ads 1 Duration</th>
+          <th class="sheet-th">Ads 1 Posts</th>
+          <th class="sheet-th">Ads 2 Name</th>
+          <th class="sheet-th">Ads 2 Fees</th>
+          <th class="sheet-th">Ads 2 Duration</th>
+          <th class="sheet-th">Ads 2 Posts</th>
+          <th class="sheet-th">Payment Method</th>
+          <th class="sheet-th">Media Upload</th>
+          <th class="sheet-th">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="sheetBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] bg-[#1c2733] border border-[#2ea6ff]/40 px-4 py-2 rounded-xl text-sm shadow-lg"></div>
+
+<script>
+'use strict';
+
+const tg = window.Telegram?.WebApp;
+if (tg) {
+  tg.ready(); tg.expand();
+  tg.setHeaderColor('#17212b');
+  tg.setBackgroundColor('#0f1419');
+  const u = tg.initDataUnsafe?.user;
+  if (u) {
+    document.getElementById('drawerName').textContent = `${u.first_name||''} ${u.last_name||''}`.trim() || 'Admin';
+    document.getElementById('drawerHandle').textContent = u.username ? '@'+u.username : '';
+    document.getElementById('drawerAvatar').textContent = (u.first_name||'A')[0].toUpperCase();
+  }
+}
+
+const API = '';
+async function api(path, opts = {}) {
+  const res = await fetch(API + path, {
+    headers: { 'Content-Type': 'application/json' },
+    ...opts,
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.remove('hidden');
+  clearTimeout(window.__toast);
+  window.__toast = setTimeout(()=>t.classList.add('hidden'), 1800);
+}
+function avatarColor(seed) {
+  const colors = ['#2ea6ff','#5288c1','#f59e0b','#10b981','#ef4444','#8b5cf6','#ec4899','#14b8a6'];
+  let h = 0;
+  for (let i=0; i<seed.length; i++) h = (h*31 + seed.charCodeAt(i)) >>> 0;
+  return colors[h % colors.length];
+}
+function initials(name) {
+  const parts = (name||'?').trim().split(/\s+/);
+  return ((parts[0]?.[0]||'') + (parts[1]?.[0]||'')).toUpperCase() || '?';
+}
+function timeAgo(ts) {
+  const s = Math.floor((Date.now() - new Date(ts).getTime())/1000);
+  if (s < 60) return 'now';
+  if (s < 3600) return Math.floor(s/60)+'m';
+  if (s < 86400) return Math.floor(s/3600)+'h';
+  return Math.floor(s/86400)+'d';
+}
+function escapeHtml(s) {
+  return String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+let currentTab = 'private';
+let currentChat = null;
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tab-private').className =
+    `flex-1 py-2 rounded-xl text-sm font-semibold transition ${tab==='private' ? 'bg-[#2ea6ff] text-white' : 'bg-[#1c2733] text-[#8a9aa9]'}`;
+  document.getElementById('tab-group').className =
+    `flex-1 py-2 rounded-xl text-sm font-semibold transition ${tab==='group' ? 'bg-[#2ea6ff] text-white' : 'bg-[#1c2733] text-[#8a9aa9]'}`;
+  loadChats();
+}
+
+async function loadChats() {
+  const list = document.getElementById('chatList');
+  list.innerHTML = `
+    <div class="px-4 py-3"><div class="shimmer h-14 rounded-xl"></div></div>
+    <div class="px-4 py-3"><div class="shimmer h-14 rounded-xl"></div></div>
+    <div class="px-4 py-3"><div class="shimmer h-14 rounded-xl"></div></div>`;
+  try {
+    const chats = await api(`/api/chats?type=${currentTab}`);
+    if (!chats.length) {
+      list.innerHTML = '';
+      document.getElementById('emptyState').classList.remove('hidden');
+      return;
+    }
+    document.getElementById('emptyState').classList.add('hidden');
+    list.innerHTML = chats.map(c => `
+      <div onclick='openChat(${JSON.stringify(c).replace(/'/g,"&#39;")})' class="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-[#17212b] transition">
+        <div class="w-12 h-12 rounded-full flex items-center justify-center font-bold flex-shrink-0" style="background:${avatarColor(c.chat_id)}">${initials(c.customer_name)}</div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between">
+            <div class="font-semibold text-sm truncate">${escapeHtml(c.customer_name||'Unknown')}</div>
+            <div class="text-[10px] text-[#8a9aa9]">${timeAgo(c.updated_at)}</div>
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="text-[12px] text-[#8a9aa9] truncate">${escapeHtml(c.last_message||'')}</div>
+            ${c.unread_count>0 ? `<span class="ml-2 bg-[#2ea6ff] text-white text-[10px] rounded-full px-2 py-0.5">${c.unread_count}</span>` : ''}
+          </div>
+          <div class="text-[10px] text-[#5288c1] mt-0.5">${(c.bot_source||'').toUpperCase()} · ${c.username?'@'+c.username:''}</div>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) {
+    list.innerHTML = `<div class="px-4 py-8 text-center text-red-400 text-sm">Failed to load: ${e.message}</div>`;
+  }
+}
+
+async function openChat(chatObj) {
+  currentChat = typeof chatObj === 'string' ? JSON.parse(chatObj) : chatObj;
+  document.getElementById('chatHeaderName').textContent = currentChat.customer_name || 'Unknown';
+  document.getElementById('chatHeaderMeta').textContent = `${(currentChat.bot_source||'').toUpperCase()} · ${currentChat.username?'@'+currentChat.username:'No username'}`;
+  document.getElementById('chatHeaderAvatar').textContent = initials(currentChat.customer_name);
+  document.getElementById('chatHeaderAvatar').style.background = avatarColor(currentChat.chat_id);
+  document.getElementById('chatWindow').classList.remove('hidden');
+  await loadMessages(currentChat.chat_id);
+  pollMessagesStart();
+}
+function closeChat() {
+  document.getElementById('chatWindow').classList.add('hidden');
+  currentChat = null;
+  pollMessagesStop();
+  loadChats();
+}
+
+async function loadMessages(chatId) {
+  const scroll = document.getElementById('messagesScroll');
+  if (!scroll.dataset.loaded) scroll.innerHTML = `<div class="text-center text-[#8a9aa9] text-xs py-8">Loading…</div>`;
+  try {
+    const msgs = await api(`/api/messages/${encodeURIComponent(chatId)}`);
+    scroll.dataset.loaded = '1';
+    scroll.innerHTML = msgs.map(m => {
+      const isAdmin = m.sender === 'admin';
+      return `<div class="flex ${isAdmin?'justify-end':'justify-start'}">
+        <div class="max-w-[78%] ${isAdmin?'bubble-out':'bubble-in'} px-3 py-2">
+          <div class="text-sm whitespace-pre-wrap break-words">${escapeHtml(m.message_text)}</div>
+          <div class="text-[10px] opacity-60 mt-1 text-right">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
+        </div>
+      </div>`;
+    }).join('');
+    scroll.scrollTop = scroll.scrollHeight;
+  } catch (e) {
+    scroll.innerHTML = `<div class="text-center text-red-400 text-sm py-8">Failed: ${e.message}</div>`;
+  }
+}
+
+let pollTimer = null;
+function pollMessagesStart() {
+  pollMessagesStop();
+  pollTimer = setInterval(() => { if (currentChat) loadMessages(currentChat.chat_id); }, 4000);
+}
+function pollMessagesStop() { if (pollTimer) clearInterval(pollTimer); pollTimer = null; }
+
+async function sendReply(ev) {
+  ev.preventDefault();
+  const inp = document.getElementById('replyInput');
+  const text = inp.value.trim();
+  if (!text || !currentChat) return;
+  inp.value = '';
+  try {
+    await api('/api/send-message', { method:'POST', body: JSON.stringify({ chat_id: currentChat.chat_id, message_text: text }) });
+    await loadMessages(currentChat.chat_id);
+  } catch (e) { toast('Send failed: ' + e.message); }
+}
+
+function toggleDrawer(open) {
+  document.getElementById('drawer').classList.toggle('open', open);
+  document.getElementById('drawerBackdrop').classList.toggle('show', open);
+}
+
+function openAdminGate() {
+  toggleDrawer(false);
+  document.getElementById('adminGate').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('adminPwd').focus(), 100);
+}
+function closeAdminGate() {
+  document.getElementById('adminGate').classList.add('hidden');
+  document.getElementById('adminPwd').value = '';
+  document.getElementById('adminErr').classList.add('hidden');
+}
+async function verifyAdmin() {
+  const pwd = document.getElementById('adminPwd').value;
+  try {
+    const r = await api('/api/admin-auth', { method:'POST', body: JSON.stringify({ password: pwd }) });
+    if (r.ok) { closeAdminGate(); openAdminDash(); }
+    else throw new Error('bad');
+  } catch { document.getElementById('adminErr').classList.remove('hidden'); }
+}
+
+let adsCache = [];
+let currentPage = 0;
+const PAGE_SIZE = 12;
+const TOTAL_PAGES = 3;
+
+async function openAdminDash() {
+  document.getElementById('adminDash').classList.remove('hidden');
+  await Promise.all([refreshWallet(), refreshAds()]);
+}
+function closeAdminDash() { document.getElementById('adminDash').classList.add('hidden'); }
+
+async function refreshWallet() {
+  try {
+    const r = await api('/api/wallet-summary');
+    document.getElementById('walletTotal').textContent = '$' + Number(r.total||0).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2});
+    document.getElementById('walletCount').textContent = r.count;
+  } catch { document.getElementById('walletTotal').textContent = 'Error'; }
+}
+
+async function refreshAds() {
+  try { adsCache = await api('/api/ads'); renderGrid(); }
+  catch { toast('Load ads failed'); }
+}
+
+function renderGrid() {
+  const track = document.getElementById('slideTrack');
+  const dots  = document.getElementById('dots');
+  track.innerHTML = ''; dots.innerHTML = '';
+
+  for (let p=0; p<TOTAL_PAGES; p++) {
+    const pageRows = adsCache.slice(p*PAGE_SIZE, p*PAGE_SIZE + PAGE_SIZE);
+    const page = document.createElement('div');
+    page.className = 'slide-page p-3 grid grid-cols-3 gap-2';
+
+    for (let i=0; i<PAGE_SIZE; i++) {
+      const row = pageRows[i];
+      if (!row) {
+        page.innerHTML += `<div class="aspect-[3/4] rounded-xl bg-[#1c2733]/40 border border-dashed border-[#232e3c]"></div>`;
+        continue;
+      }
+      const ini = initials(row.channel_name);
+      const bg  = avatarColor(row.channel_name);
+      const logo = row.logo_url
+        ? `<img src="${escapeHtml(row.logo_url)}" alt="" class="w-full h-full object-cover" onerror="this.outerHTML='<div class=&quot;w-full h-full flex items-center justify-center text-white font-bold text-lg&quot; style=&quot;background:${bg}&quot;>${ini}</div>'">`
+        : `<div class="w-full h-full flex items-center justify-center text-white font-bold text-lg" style="background:${bg}">${ini}</div>`;
+      page.innerHTML += `
+        <div onclick="openDetail(${row.id})" class="aspect-[3/4] rounded-xl bg-[#1c2733] overflow-hidden cursor-pointer hover:scale-[1.03] transition border border-[#232e3c]">
+          <div class="h-3/5 overflow-hidden">${logo}</div>
+          <div class="p-2">
+            <div class="text-[11px] font-semibold truncate">${escapeHtml(row.channel_name)}</div>
+            <div class="text-[10px] text-[#2ea6ff] mt-0.5">$${(Number(row.ads1_fees||0)+Number(row.ads2_fees||0)).toFixed(0)}</div>
+          </div>
+        </div>`;
+    }
+    track.appendChild(page);
+
+    const dot = document.createElement('button');
+    dot.className = `w-2.5 h-2.5 rounded-full ${p===currentPage?'bg-[#2ea6ff]':'bg-[#1c2733]'}`;
+    dot.onclick = () => { currentPage = p; updateSlide(); };
+    dots.appendChild(dot);
+  }
+  updateSlide();
+}
+
+function updateSlide() {
+  document.getElementById('slideTrack').style.transform = `translateX(-${currentPage*100}%)`;
+  document.getElementById('pageIndicator').textContent = `Page ${currentPage+1}/${TOTAL_PAGES}`;
+  document.querySelectorAll('#dots button').forEach((d,i)=>{
+    d.className = `w-2.5 h-2.5 rounded-full ${i===currentPage?'bg-[#2ea6ff]':'bg-[#1c2733]'}`;
+  });
+}
+function changePage(delta) {
+  currentPage = Math.max(0, Math.min(TOTAL_PAGES-1, currentPage+delta));
+  updateSlide();
+}
+
+async function openDetail(id) {
+  const row = adsCache.find(r=>r.id===id);
+  if (!row) return;
+  document.getElementById('detailName').textContent = row.channel_name;
+  document.getElementById('detailLink').textContent = row.telegram_link || '';
+  document.getElementById('detailAds1').textContent = row.ads1 || '—';
+  document.getElementById('detailAds1Fee').textContent = '$' + Number(row.ads1_fees||0).toFixed(2);
+  document.getElementById('detailAds2').textContent = row.ads2 || '—';
+  document.getElementById('detailAds2Fee').textContent = '$' + Number(row.ads2_fees||0).toFixed(2);
+  document.getElementById('detailPayment').textContent = row.payment_method || '—';
+  document.getElementById('detailViewBtn').href = row.telegram_link || '#';
+
+  const logo = document.getElementById('detailLogo');
+  if (row.logo_url) {
+    logo.innerHTML = `<img src="${escapeHtml(row.logo_url)}" alt="" class="w-full h-full object-cover" onerror="this.parentNode.innerHTML='<span>${initials(row.channel_name)}</span>'">`;
+  } else {
+    logo.innerHTML = `<span>${initials(row.channel_name)}</span>`;
+    logo.style.background = avatarColor(row.channel_name);
+  }
+
+  const banner = document.getElementById('detailBanner');
+  banner.innerHTML = `<div class="absolute inset-0 flex items-center justify-center text-[#8a9aa9] text-xs">Loading media…</div>`;
+
+  if (row.telegram_file_id) {
+    try {
+      const r = await api(`/api/get-media-url/${encodeURIComponent(row.telegram_file_id)}`);
+      if (r.url) banner.innerHTML = `<img src="${r.url}" alt="" class="w-full h-full object-cover">`;
+    } catch {
+      banner.innerHTML = `<div class="absolute inset-0 flex items-center justify-center text-[#8a9aa9] text-xs">Failed to resolve</div>`;
+    }
+  } else if (row.logo_url) {
+    banner.innerHTML = `<img src="${escapeHtml(row.logo_url)}" alt="" class="w-full h-full object-cover opacity-60">`;
+  } else {
+    banner.innerHTML = `<div class="absolute inset-0 flex items-center justify-center text-[#8a9aa9] text-xs">No media uploaded</div>`;
+  }
+
+  document.getElementById('detailModal').classList.remove('hidden');
+}
+function closeDetail() { document.getElementById('detailModal').classList.add('hidden'); }
+
+async function openWalletHistory() {
+  document.getElementById('walletHistoryModal').classList.remove('hidden');
+  const list = document.getElementById('walletHistoryList');
+  list.innerHTML = `<div class="text-center text-[#8a9aa9] text-xs py-8">Loading…</div>`;
+  try {
+    const rows = await api('/api/wallet-history');
+    list.innerHTML = rows.map(r => {
+      const sum = Number(r.ads1_fees||0)+Number(r.ads2_fees||0);
+      return `<div class="bg-[#1c2733] rounded-xl p-3 flex items-center justify-between">
+        <div class="min-w-0">
+          <div class="font-semibold text-sm truncate">${escapeHtml(r.channel_name)}</div>
+          <div class="text-[11px] text-[#8a9aa9] truncate">${escapeHtml(r.ads1||'')} · ${escapeHtml(r.ads2||'')}</div>
+        </div>
+        <div class="text-right ml-2">
+          <div class="text-[#2ea6ff] font-bold">$${sum.toFixed(2)}</div>
+          <div class="text-[10px] text-[#8a9aa9]">${timeAgo(r.updated_at)}</div>
+        </div>
+      </div>`;
+    }).join('') || '<div class="text-center text-[#8a9aa9] text-xs py-8">No data</div>';
+  } catch { list.innerHTML = '<div class="text-center text-red-400 text-xs py-8">Failed</div>'; }
+}
+function closeWalletHistory() { document.getElementById('walletHistoryModal').classList.add('hidden'); }
+
+function openSpreadsheet() { document.getElementById('spreadsheetModal').classList.remove('hidden'); renderSheet(); }
+function closeSpreadsheet() { document.getElementById('spreadsheetModal').classList.add('hidden'); refreshAds(); refreshWallet(); }
+
+function renderSheet() {
+  const body = document.getElementById('sheetBody');
+  body.innerHTML = adsCache.map((r,idx) => `
+    <tr data-id="${r.id}">
+      <td class="sheet-cell text-center text-[#8a9aa9] px-2">${idx+1}</td>
+      <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.channel_name||'')}" onchange="updateCellDatabase(${r.id},'channel_name',this.value)"></td>
+      <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.telegram_link||'')}" onchange="updateCellDatabase(${r.id},'telegram_link',this.value)"></td>
+      <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.logo_url||'')}" onchange="updateCellDatabase(${r.id},'logo_url',this.value)"></td>
+      <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.ads1||'')}" onchange="updateCellDatabase(${r.id},'ads1',this.value)"></td>
+      <td class="sheet-cell"><input class="sheet-input" type="number" value="${r.ads1_fees||0}" onchange="updateCellDatabase(${r.id},'ads1_fees',this.value)"></td>
+      <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.ads1_duration||'')}" onchange="updateCellDatabase(${r.id},'ads1_duration',this.value)"></td>
+      <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.ads1_posts||'')}" onchange="updateCellDatabase(${r.id},'ads1_posts',this.value)"></td>
+      <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.ads2||'')}" onchange="updateCellDatabase(${r.id},'ads2',this.value)"></td>
+      <td class="sheet-cell"><input class="sheet-input" type="number" value="${r.ads2_fees||0}" onchange="updateCellDatabase(${r.id},'ads2_fees',this.value)"></td>
+      <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.ads2_duration||'')}" onchange="updateCellDatabase(${r.id},'ads2_duration',this.value)"></td>
+      <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.ads2_posts||'')}" onchange="updateCellDatabase(${r.id},'ads2_posts',this.value)"></td>
+      <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.payment_method||'')}" onchange="updateCellDatabase(${r.id},'payment_method',this.value)"></td>
+      <td class="sheet-cell px-2 py-1">
+        <div class="flex items-center gap-1">
+          <input type="file" accept="image/*" class="text-[10px] text-[#8a9aa9] w-32" onchange="uploadRowMediaAsset(${r.id}, this)">
+          ${r.telegram_file_id ? `<span class="text-[10px] text-[#10b981]">✓</span>` : ''}
+        </div>
+      </td>
+      <td class="sheet-cell text-center px-2">
+        <button onclick="deleteRow(${r.id})" class="text-red-400 text-xs hover:underline">Del</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function updateCellDatabase(id, column, value) {
+  const ind = document.getElementById('saveIndicator');
+  ind.textContent = 'Saving…';
+  try {
+    const r = await api('/api/update-cell', { method:'POST', body: JSON.stringify({ id, column, value }) });
+    const i = adsCache.findIndex(x=>x.id===id);
+    if (i>=0) adsCache[i] = r.row;
+    ind.textContent = '✓ Saved';
+    setTimeout(()=>ind.textContent='', 1200);
+  } catch { ind.textContent = '✗ Error'; toast('Save failed'); }
+}
+
+async function uploadRowMediaAsset(id, inputEl) {
+  const file = inputEl.files?.[0];
+  if (!file) return;
+  const ind = document.getElementById('saveIndicator');
+  ind.textContent = 'Uploading to Telegram…';
+  try {
+    const fd = new FormData();
+    fd.append('file', file);
+    const res = await fetch(`/api/upload-media/${id}`, { method:'POST', body: fd });
+    if (!res.ok) throw new Error(await res.text());
+    const r = await res.json();
+    const i = adsCache.findIndex(x=>x.id===id);
+    if (i>=0) adsCache[i] = r.row;
+    ind.textContent = '✓ Uploaded';
+    setTimeout(()=>ind.textContent='', 1500);
+    renderSheet();
+  } catch (e) {
+    ind.textContent = '✗ Upload failed';
+    toast('Upload failed: ' + e.message);
+  }
+}
+
+async function addRow() {
+  try { const r = await api('/api/add-row', { method:'POST', body: '{}' }); adsCache.push(r); renderSheet(); }
+  catch { toast('Add failed'); }
+}
+async function deleteRow(id) {
+  if (!confirm('Delete this row?')) return;
+  try { await api('/api/delete-row/'+id, { method:'DELETE' }); adsCache = adsCache.filter(x=>x.id!==id); renderSheet(); }
+  catch { toast('Delete failed'); }
+}
+
+loadChats();
+setInterval(() => { if (!currentChat) loadChats(); }, 8000);
+</script>
+</body>
+</html>

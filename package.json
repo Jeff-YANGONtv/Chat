@@ -1,0 +1,19 @@
+{
+  "name": "jb-hub-telegram-miniapp",
+  "version": "1.0.0",
+  "description": "Telegram Mini App: Ad Network Hub + Live Chat Router",
+  "main": "api/index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "form-data": "^4.0.0",
+    "node-fetch": "^2.7.0",
+    "busboy": "^1.6.0"
+  },
+  "engines": {
+    "node": ">=18.x"
+  }
+}
