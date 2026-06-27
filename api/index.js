@@ -138,18 +138,30 @@ module.exports = async (req, res) => {
       const messageText  = message.text || message.caption || '[media]';
 
       const { data: existing } = await supabase
-        .from('customer_chats').select('id').eq('chat_id', chatId).maybeSingle();
+        .from('customer_chats').select('id, unread_count').eq('chat_id', chatId).maybeSingle();
 
       if (existing) {
+        // If it was already a chat, we just update it
         await supabase.from('customer_chats').update({
-          username, customer_name: customerName, last_message: messageText,
-          bot_source: botKey, chat_type: chatType, unread_count: 1,
+          username, 
+          customer_name: customerName, 
+          last_message: messageText,
+          bot_source: botKey, 
+          chat_type: chatType, 
+          unread_count: (existing.unread_count || 0) + 1,
           updated_at: new Date().toISOString(),
         }).eq('chat_id', chatId);
       } else {
+        // New chat
         await supabase.from('customer_chats').insert({
-          chat_id: chatId, username, customer_name: customerName,
-          last_message: messageText, bot_source: botKey, chat_type: chatType, unread_count: 1,
+          chat_id: chatId, 
+          username, 
+          customer_name: customerName,
+          last_message: messageText, 
+          bot_source: botKey, 
+          chat_type: chatType, 
+          unread_count: 1,
+          updated_at: new Date().toISOString(),
         });
       }
 
@@ -164,8 +176,10 @@ module.exports = async (req, res) => {
     if (path === '/api/chats' && req.method === 'GET') {
       const type = url.searchParams.get('type') === 'group' ? 'group' : 'private';
       const { data, error } = await supabase
-        .from('customer_chats').select('*').eq('chat_type', type)
-        .order('updated_at', { ascending: false });
+        .from('customer_chats')
+        .select('*')
+        .eq('chat_type', type)
+        .order('updated_at', { ascending: false, nullsFirst: false });
       if (error) return json(res, 500, { error: error.message });
       return json(res, 200, data || []);
     }
