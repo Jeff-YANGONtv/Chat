@@ -137,6 +137,27 @@ module.exports = async (req, res) => {
       const username     = message.from?.username || message.chat?.username || '';
       const messageText  = message.text || message.caption || '[media]';
 
+      // Fetch Profile Photo URL
+      let photoUrl = '';
+      try {
+        const userId = message.from?.id || message.chat.id;
+        const photoRes = await tgApi(token, isGroup ? 'getChat' : 'getUserProfilePhotos', isGroup ? { chat_id: chatId } : { user_id: userId, limit: 1 });
+        
+        let fileId = '';
+        if (isGroup && photoRes.result?.photo?.big_file_id) {
+          fileId = photoRes.result.photo.big_file_id;
+        } else if (!isGroup && photoRes.result?.total_count > 0) {
+          fileId = photoRes.result.photos[0][0].file_id;
+        }
+
+        if (fileId) {
+          const fileInfo = await tgGetFile(token, fileId);
+          if (fileInfo.result?.file_path) {
+            photoUrl = `https://api.telegram.org/file/bot${token}/${fileInfo.result.file_path}`;
+          }
+        }
+      } catch (e) { console.error('Photo fetch error:', e); }
+
       const { data: existing } = await supabase
         .from('customer_chats').select('id, unread_count').eq('chat_id', chatId).maybeSingle();
 
@@ -148,6 +169,7 @@ module.exports = async (req, res) => {
           last_message: messageText,
           bot_source: botKey, 
           chat_type: chatType, 
+          photo_url: photoUrl || undefined,
           unread_count: (existing.unread_count || 0) + 1,
           updated_at: new Date().toISOString(),
         }).eq('chat_id', chatId);
@@ -160,6 +182,7 @@ module.exports = async (req, res) => {
           last_message: messageText, 
           bot_source: botKey, 
           chat_type: chatType, 
+          photo_url: photoUrl,
           unread_count: 1,
           updated_at: new Date().toISOString(),
         });

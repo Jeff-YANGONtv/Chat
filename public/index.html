@@ -346,7 +346,7 @@ async function loadChats() {
     document.getElementById('emptyState').classList.add('hidden');
     list.innerHTML = chats.map(chat => `
       <div class="chat-item px-3 py-3 cursor-pointer" onclick="openChat('${escapeHtml(chat.chat_id)}')"><div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-lg gradient-accent flex items-center justify-center font-bold text-sm flex-shrink-0 glow-effect">${escapeHtml(chat.customer_name||'User').substring(0,2).toUpperCase()}</div>
+          ${chat.photo_url ? `<img src="${escapeHtml(chat.photo_url)}" class="w-12 h-12 rounded-lg object-cover flex-shrink-0 glow-effect" />` : `<div class="w-12 h-12 rounded-lg gradient-accent flex items-center justify-center font-bold text-sm flex-shrink-0 glow-effect">${escapeHtml(chat.customer_name||'User').substring(0,2).toUpperCase()}</div>`}
           <div class="flex-1 min-w-0">
             <div class="font-semibold text-sm truncate">${escapeHtml(chat.customer_name||'User')}</div>
             <div class="text-[12px] text-[#a0aec0] truncate">${escapeHtml(chat.last_message||'No messages')}</div>
@@ -384,7 +384,12 @@ async function openChat(chatId) {
     
     document.getElementById('chatHeaderName').textContent = escapeHtml(chatInfo.customer_name||'User');
     document.getElementById('chatHeaderMeta').textContent = escapeHtml(chatInfo.username||'');
-    document.getElementById('chatHeaderAvatar').textContent = escapeHtml(chatInfo.customer_name||'User').substring(0,2).toUpperCase();
+    const avatarEl = document.getElementById('chatHeaderAvatar');
+    if (chatInfo.photo_url) {
+      avatarEl.innerHTML = `<img src="${escapeHtml(chatInfo.photo_url)}" class="w-full h-full object-cover rounded-lg" />`;
+    } else {
+      avatarEl.textContent = escapeHtml(chatInfo.customer_name||'User').substring(0,2).toUpperCase();
+    }
     
     const scroll = document.getElementById('messagesScroll');
     scroll.innerHTML = messages.map(msg => {
