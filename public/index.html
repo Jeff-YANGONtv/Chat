@@ -341,11 +341,10 @@ async function loadChats() {
     }
     document.getElementById('emptyState').classList.add('hidden');
     list.innerHTML = chats.map(chat => `
-      <div class="chat-item px-3 py-3 cursor-pointer" onclick="openChat(${chat.user_id})">
-        <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-lg gradient-accent flex items-center justify-center font-bold text-sm flex-shrink-0 glow-effect">${escapeHtml(chat.name).substring(0,2).toUpperCase()}</div>
+      <div class="chat-item px-3 py-3 cursor-pointer" onclick="openChat('${escapeHtml(chat.chat_id)}')"><div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-lg gradient-accent flex items-center justify-center font-bold text-sm flex-shrink-0 glow-effect">${escapeHtml(chat.customer_name||'User').substring(0,2).toUpperCase()}</div>
           <div class="flex-1 min-w-0">
-            <div class="font-semibold text-sm truncate">${escapeHtml(chat.name)}</div>
+            <div class="font-semibold text-sm truncate">${escapeHtml(chat.customer_name||'User')}</div>
             <div class="text-[12px] text-[#a0aec0] truncate">${escapeHtml(chat.last_message||'No messages')}</div>
           </div>
           <div class="text-[11px] text-[#a0aec0] flex-shrink-0">${timeAgo(chat.updated_at)}</div>
@@ -367,20 +366,31 @@ function switchTab(tab) {
   loadChats();
 }
 
-async function openChat(userId) {
+async function openChat(chatId) {
   try {
-    currentChat = userId;
-    const chat = await api('/api/chat/' + userId);
-    document.getElementById('chatHeaderName').textContent = chat.name;
-    document.getElementById('chatHeaderMeta').textContent = timeAgo(chat.updated_at);
-    document.getElementById('chatHeaderAvatar').textContent = escapeHtml(chat.name).substring(0,2).toUpperCase();
+    currentChat = chatId;
+    const messages = await api('/api/messages/' + encodeURIComponent(chatId));
+    const chats = await api('/api/chats?type=' + currentTab);
+    const chatInfo = chats.find(c => c.chat_id === chatId);
+    
+    if (!chatInfo) {
+      toast('Chat not found');
+      return;
+    }
+    
+    document.getElementById('chatHeaderName').textContent = escapeHtml(chatInfo.customer_name||'User');
+    document.getElementById('chatHeaderMeta').textContent = escapeHtml(chatInfo.username||'');
+    document.getElementById('chatHeaderAvatar').textContent = escapeHtml(chatInfo.customer_name||'User').substring(0,2).toUpperCase();
     
     const scroll = document.getElementById('messagesScroll');
-    scroll.innerHTML = chat.messages.map(msg => `
-      <div class="flex ${msg.direction==='out' ? 'justify-end' : 'justify-start'}">
-        <div class="bubble-${msg.direction} max-w-xs px-4 py-2 rounded-lg text-sm">${escapeHtml(msg.text)}</div>
-      </div>
-    `).join('');
+    scroll.innerHTML = messages.map(msg => {
+      const isAdmin = msg.sender === 'admin';
+      return `
+        <div class="flex ${isAdmin ? 'justify-end' : 'justify-start'}">
+          <div class="bubble-${isAdmin ? 'out' : 'in'} max-w-xs px-4 py-2 rounded-lg text-sm">${escapeHtml(msg.message_text)}</div>
+        </div>
+      `;
+    }).join('');
     scroll.scrollTop = scroll.scrollHeight;
     
     document.getElementById('chatWindow').classList.remove('hidden');
@@ -402,7 +412,7 @@ async function sendReply(e) {
   if (!text || !currentChat) return;
   input.value = '';
   try {
-    await api('/api/reply', { method:'POST', body: JSON.stringify({ user_id: currentChat, text }) });
+    await api('/api/send-message', { method:'POST', body: JSON.stringify({ chat_id: currentChat, message_text: text }) });
     await openChat(currentChat);
   } catch (e) {
     console.error(e);
