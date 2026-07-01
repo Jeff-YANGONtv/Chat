@@ -401,7 +401,7 @@ function closeAdminDash() { document.getElementById('adminDash').classList.add('
 async function refreshWallet() {
   try {
     const w = await api('/api/wallet-summary');
-    document.getElementById('walletTotal').textContent = '$' + Number(w.total||0).toFixed(2);
+    document.getElementById('walletTotal').textContent = Number(w.total||0).toLocaleString() + ' MMK';
     document.getElementById('walletCount').textContent = w.count;
   } catch(e) {}
 }
@@ -435,7 +435,7 @@ function renderGrid() {
           <div class="h-3/5 overflow-hidden">${logo}</div>
           <div class="p-2">
             <div class="text-[11px] font-semibold truncate">${escapeHtml(row.channel_name)}</div>
-            <div class="text-[10px] text-[#2ea6ff] mt-0.5">$${(Number(row.ads1_fees||0)+Number(row.ads2_fees||0)+Number(row.ads3_fees||0)+Number(row.ads4_fees||0)).toFixed(0)}</div>
+            <div class="text-[10px] text-[#2ea6ff] mt-0.5">${(Number(row.ads1_fees||0)+Number(row.ads2_fees||0)+Number(row.ads3_fees||0)+Number(row.ads4_fees||0)).toLocaleString()} MMK</div>
           </div>
         </div>`;
     }
@@ -482,7 +482,7 @@ async function openDetail(id) {
             <div class="text-[11px] font-semibold text-[#2ea6ff]">Ads ${i}</div>
             <div class="text-right">
               <div class="text-[10px] text-[#8a9aa9]">Price</div>
-              <div class="text-sm font-bold text-[#2ea6ff]">$${Number(fee||0).toFixed(2)}</div>
+              <div class="text-sm font-bold text-[#2ea6ff]">${Number(fee||0).toLocaleString()} MMK</div>
             </div>
           </div>
           <div class="grid grid-cols-2 gap-2 mb-2 text-[10px]">
@@ -542,7 +542,7 @@ async function openWalletHistory() {
           <div class="text-[11px] text-[#8a9aa9] truncate">${escapeHtml(r.ads1||'')} · ${escapeHtml(r.ads2||'')}</div>
         </div>
         <div class="text-right ml-2">
-          <div class="text-[#2ea6ff] font-bold">$${sum.toFixed(2)}</div>
+          <div class="text-[#2ea6ff] font-bold">${sum.toLocaleString()} MMK</div>
           <div class="text-[10px] text-[#8a9aa9]">${timeAgo(r.updated_at)}</div>
         </div>
       </div>`;
