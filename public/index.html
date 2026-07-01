@@ -315,7 +315,11 @@ function escapeHtml(text) {
 function timeAgo(date) {
   const d = new Date(date);
   const now = new Date();
-  const secs = Math.floor((now - d) / 1000);
+  // Adjust for 6.5 hour offset (Myanmar Time MMT is UTC+6:30)
+  // If the server/database is using UTC and client is seeing 6 hours behind, 
+  // we add 6.5 hours to the date object to match local time comparison.
+  const offset = 6.5 * 60 * 60 * 1000;
+  const secs = Math.floor((now - (d.getTime() + offset)) / 1000);
   if (secs < 60) return 'just now';
   if (secs < 3600) return Math.floor(secs/60) + 'm ago';
   if (secs < 86400) return Math.floor(secs/3600) + 'h ago';
