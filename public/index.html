@@ -511,7 +511,17 @@ async function showDetail(id) {
     const name = row[`ads${i}`];
     const fees = row[`ads${i}_fees`];
     if (!name) return '';
-    return `<div class="bg-[#1a1f3a] rounded-lg p-2"><div class="text-xs font-semibold">${escapeHtml(name)}</div><div class="text-[10px] text-[#a0aec0]">${fees} MMK</div></div>`;
+    return `
+  <div class="bg-[#1a1f3a] rounded-lg p-2 flex justify-between items-center">
+    <div>
+      <div class="text-xs font-semibold">${escapeHtml(name)}</div>
+      <div class="text-[10px] text-[#a0aec0]">${fees} MMK</div>
+    </div>
+    <a href="${escapeHtml(name)}" target="_blank" class="bg-[#00d4ff]/10 hover:bg-[#00d4ff]/20 text-[#00d4ff] text-[9px] px-2 py-1 rounded border border-[#00d4ff]/30 transition">
+      View Post
+    </a>
+  </div>
+`;
   }).join('');
   
   const banner = document.getElementById('detailBanner');
