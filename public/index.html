@@ -259,7 +259,6 @@
           <th class="sheet-th">Ads 4 Duration</th>
           <th class="sheet-th">Ads 4 Posts</th>
           <th class="sheet-th">Payment Method</th>
-          <th class="sheet-th">Telegram Media</th>
           <th class="sheet-th">Actions</th>
         </tr>
       </thead>
@@ -580,12 +579,6 @@ function renderSheet() {
       <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.ads4_duration||'')}" onchange="updateCellDatabase(${r.id},'ads4_duration',this.value)"></td>
       <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.ads4_posts||'')}" onchange="updateCellDatabase(${r.id},'ads4_posts',this.value)"></td>
       <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.payment_method||'')}" onchange="updateCellDatabase(${r.id},'payment_method',this.value)"></td>
-      <td class="sheet-cell px-2 py-1">
-        <div class="flex items-center gap-1">
-          <input type="file" accept="image/*" class="text-[10px] text-[#8a9aa9] w-32" onchange="uploadRowMediaAsset(${r.id}, this)">
-          ${r.telegram_file_id ? `<span class="text-[10px] text-[#10b981]">✓</span>` : ''}
-        </div>
-      </td>
       <td class="sheet-cell text-center px-2">
         <button onclick="deleteRow(${r.id})" class="text-red-400 text-xs hover:underline">Del</button>
       </td>
