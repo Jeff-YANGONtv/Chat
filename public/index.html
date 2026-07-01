@@ -477,25 +477,16 @@ async function openDetail(id) {
     const posts = row[`ads${i}_posts`];
     if(name || fee || duration || posts) {
       grid.innerHTML += `
-        <div class="bg-[#1c2733] rounded-xl px-4 py-3">
-          <div class="flex items-center justify-between mb-2">
-            <div class="text-[11px] font-semibold text-[#2ea6ff]">Ads ${i}</div>
-            <div class="text-right">
-              <div class="text-[10px] text-[#8a9aa9]">Price</div>
-              <div class="text-sm font-bold text-[#2ea6ff]">${Number(fee||0).toLocaleString()} MMK</div>
+        <div class="bg-[#1c2733] rounded-lg px-3 py-2 flex items-center justify-between gap-2 border border-[#232e3c]">
+          <div class="flex-1 min-w-0">
+            <div class="text-[11px] font-bold text-[#2ea6ff] truncate">${escapeHtml(name || `Ads ${i}`)}</div>
+            <div class="flex items-center gap-2 mt-0.5">
+              <span class="text-[10px] font-semibold text-white">${Number(fee||0).toLocaleString()} MMK</span>
+              <span class="text-[10px] text-[#8a9aa9]">•</span>
+              <span class="text-[10px] text-[#8a9aa9]">${escapeHtml(duration||'—')}</span>
             </div>
           </div>
-          <div class="grid grid-cols-2 gap-2 mb-2 text-[10px]">
-            <div>
-              <div class="text-[#8a9aa9]">Duration</div>
-              <div class="font-semibold">${escapeHtml(duration||'—')}</div>
-            </div>
-            <div>
-              <div class="text-[#8a9aa9]">Posts</div>
-              <div class="font-semibold">${escapeHtml(posts||'—')}</div>
-            </div>
-          </div>
-          ${posts ? `<a href="${escapeHtml(posts)}" target="_blank" class="block w-full text-center bg-[#2ea6ff] hover:bg-[#1f8de0] text-white text-xs font-semibold py-2 rounded-lg transition">View Post</a>` : ''}
+          ${posts ? `<a href="${escapeHtml(posts)}" target="_blank" class="shrink-0 bg-[#2ea6ff] hover:bg-[#1f8de0] text-white text-[10px] font-bold px-2.5 py-1 rounded-md transition">Post</a>` : ''}
         </div>`;
     }
   }
