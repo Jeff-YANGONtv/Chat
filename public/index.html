@@ -202,14 +202,6 @@
       </div>
       <div class="space-y-2 mb-4 max-h-[300px] overflow-y-auto pr-1 scrollbar-hide">
         <div id="detailAdsGrid" class="grid grid-cols-1 gap-2"></div>
-        <div class="bg-[#1c2733] rounded-xl px-4 py-3">
-          <div class="text-[11px] text-[#8a9aa9]">Address</div>
-          <div id="detailAddress" class="text-sm font-semibold">—</div>
-        </div>
-        <div class="bg-[#1c2733] rounded-xl px-4 py-3">
-          <div class="text-[11px] text-[#8a9aa9]">Payment</div>
-          <div id="detailPayment" class="text-sm font-semibold">—</div>
-        </div>
       </div>
       <div class="flex gap-2">
         <button onclick="closeDetail()" class="flex-1 py-2.5 rounded-xl bg-[#1c2733] text-sm">Close</button>
@@ -250,7 +242,6 @@
           <th class="sheet-th">Channel Name</th>
           <th class="sheet-th">Telegram Link</th>
           <th class="sheet-th">Logo URL</th>
-          <th class="sheet-th">Address</th>
           <th class="sheet-th">Ads 1 Name</th>
           <th class="sheet-th">Ads 1 Fees</th>
           <th class="sheet-th">Ads 1 Duration</th>
@@ -476,8 +467,6 @@ async function openDetail(id) {
   if (!row) return;
   document.getElementById('detailName').textContent = row.channel_name;
   document.getElementById('detailLink').textContent = row.telegram_link || '';
-  document.getElementById('detailAddress').textContent = row.address || '—';
-  document.getElementById('detailPayment').textContent = row.payment_method || '—';
   document.getElementById('detailViewBtn').href = row.telegram_link || '#';
 
   const grid = document.getElementById('detailAdsGrid');
@@ -485,11 +474,29 @@ async function openDetail(id) {
   for(let i=1; i<=4; i++) {
     const name = row[`ads${i}`];
     const fee = row[`ads${i}_fees`];
-    if(name || fee) {
+    const duration = row[`ads${i}_duration`];
+    const posts = row[`ads${i}_posts`];
+    if(name || fee || duration || posts) {
       grid.innerHTML += `
-        <div class="bg-[#1c2733] rounded-xl px-4 py-3 flex items-center justify-between">
-          <div><div class="text-[11px] text-[#8a9aa9]">Ads ${i}</div><div class="text-sm font-semibold">${escapeHtml(name||'—')}</div></div>
-          <div class="text-right"><div class="text-[11px] text-[#8a9aa9]">Fee</div><div class="text-sm font-semibold">$${Number(fee||0).toFixed(2)}</div></div>
+        <div class="bg-[#1c2733] rounded-xl px-4 py-3">
+          <div class="flex items-center justify-between mb-2">
+            <div class="text-[11px] font-semibold text-[#2ea6ff]">Ads ${i}</div>
+            <div class="text-right">
+              <div class="text-[10px] text-[#8a9aa9]">Price</div>
+              <div class="text-sm font-bold text-[#2ea6ff]">$${Number(fee||0).toFixed(2)}</div>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2 mb-2 text-[10px]">
+            <div>
+              <div class="text-[#8a9aa9]">Duration</div>
+              <div class="font-semibold">${escapeHtml(duration||'—')}</div>
+            </div>
+            <div>
+              <div class="text-[#8a9aa9]">Posts</div>
+              <div class="font-semibold">${escapeHtml(posts||'—')}</div>
+            </div>
+          </div>
+          ${posts ? `<a href="${escapeHtml(posts)}" target="_blank" class="block w-full text-center bg-[#2ea6ff] hover:bg-[#1f8de0] text-white text-xs font-semibold py-2 rounded-lg transition">View Post</a>` : ''}
         </div>`;
     }
   }
@@ -556,7 +563,6 @@ function renderSheet() {
       <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.channel_name||'')}" onchange="updateCellDatabase(${r.id},'channel_name',this.value)"></td>
       <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.telegram_link||'')}" onchange="updateCellDatabase(${r.id},'telegram_link',this.value)"></td>
       <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.logo_url||'')}" onchange="updateCellDatabase(${r.id},'logo_url',this.value)"></td>
-      <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.address||'')}" onchange="updateCellDatabase(${r.id},'address',this.value)"></td>
       <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.ads1||'')}" onchange="updateCellDatabase(${r.id},'ads1',this.value)"></td>
       <td class="sheet-cell"><input class="sheet-input" type="number" value="${r.ads1_fees||0}" onchange="updateCellDatabase(${r.id},'ads1_fees',this.value)"></td>
       <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.ads1_duration||'')}" onchange="updateCellDatabase(${r.id},'ads1_duration',this.value)"></td>
