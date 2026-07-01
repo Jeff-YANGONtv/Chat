@@ -8,22 +8,22 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
   :root {
-    --tg-bg:        #0f1419;
-    --tg-bg-2:      #17212b;
-    --tg-bg-3:      #1c2733;
-    --tg-accent:    #2ea6ff;
-    --tg-accent-2:  #5288c1;
+    --tg-bg:        #0a0e27;
+    --tg-bg-2:      #111633;
+    --tg-bg-3:      #1a1f3a;
+    --tg-accent:    #00d4ff;
+    --tg-accent-2:  #0099cc;
     --tg-text:      #ffffff;
-    --tg-text-dim:  #8a9aa9;
-    --tg-divider:   #232e3c;
-    --tg-bubble-in: #182533;
-    --tg-bubble-out:#2b5278;
+    --tg-text-dim:  #a0aec0;
+    --tg-divider:   #2d3748;
+    --tg-bubble-in: #1a2332;
+    --tg-bubble-out:#0066b3;
   }
   * { -webkit-tap-highlight-color: transparent; }
   html, body {
     background: var(--tg-bg);
     color: var(--tg-text);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
     overflow-x: hidden;
   }
   .scrollbar-hide::-webkit-scrollbar { display: none; }
@@ -36,7 +36,7 @@
   .slide-page { flex: 0 0 100%; }
   @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
   .shimmer {
-    background: linear-gradient(90deg, #1c2733 0%, #243240 50%, #1c2733 100%);
+    background: linear-gradient(90deg, #1a1f3a 0%, #242d4a 50%, #1a1f3a 100%);
     background-size: 800px 100%;
     animation: shimmer 1.4s linear infinite;
   }
@@ -44,142 +44,164 @@
     background: transparent; border: 1px solid transparent;
     width: 100%; padding: 6px 8px; color: #fff; font-size: 12px;
   }
-  .sheet-input:focus { background:#17212b; border-color: var(--tg-accent); outline: none; }
+  .sheet-input:focus { background:#111633; border-color: var(--tg-accent); outline: none; }
   .sheet-cell { border: 1px solid var(--tg-divider); padding: 0; vertical-align: middle; }
-  .sheet-th  { background:#17212b; color:#8a9aa9; font-weight:600; font-size:11px; padding:8px; border:1px solid var(--tg-divider); position: sticky; top: 0; z-index: 5; }
+  .sheet-th  { background:#111633; color:#a0aec0; font-weight:600; font-size:11px; padding:8px; border:1px solid var(--tg-divider); position: sticky; top: 0; z-index: 5; }
   .bubble-in  { background: var(--tg-bubble-in); border-radius: 14px 14px 14px 4px; }
   .bubble-out { background: var(--tg-bubble-out); border-radius: 14px 14px 4px 14px; }
   .fade-in { animation: fadeIn .25s ease; }
   @keyframes fadeIn { from { opacity:0; transform: translateY(6px);} to { opacity:1; transform:none;} }
+  
+  /* Premium gradient effects */
+  .gradient-accent {
+    background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+  }
+  .gradient-card {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(0, 153, 204, 0.05) 100%);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+  }
+  .glow-effect {
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.15);
+  }
+  .chat-item {
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 212, 255, 0.1);
+  }
+  .chat-item:hover {
+    background: rgba(0, 212, 255, 0.05);
+    border-color: rgba(0, 212, 255, 0.2);
+    transform: translateX(4px);
+  }
 </style>
 </head>
 <body class="min-h-screen">
 
-<header class="sticky top-0 z-30 bg-[#17212b] border-b border-[#232e3c]">
-  <div class="flex items-center justify-between px-4 py-3">
-    <div class="flex items-center gap-2">
-      <div class="w-9 h-9 rounded-full bg-gradient-to-br from-[#2ea6ff] to-[#5288c1] flex items-center justify-center font-bold">JB</div>
+<header class="sticky top-0 z-30 bg-gradient-to-b from-[#111633] to-[#0a0e27] border-b border-[#2d3748]">
+  <div class="flex items-center justify-between px-4 py-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl gradient-accent flex items-center justify-center font-bold text-sm glow-effect">JB</div>
       <div>
-        <div class="text-xs font-semibold">JB Hub</div>
-        <div class="text-[10px] text-[#8a9aa9]" id="onlineStatus">Live chat router</div>
+        <div class="text-sm font-bold tracking-tight">JB Hub</div>
+        <div class="text-[11px] text-[#a0aec0]" id="onlineStatus">Live chat router</div>
       </div>
     </div>
-    <button onclick="toggleDrawer(true)" class="w-10 h-10 rounded-full bg-[#1c2733] flex items-center justify-center hover:bg-[#243240] transition">
+    <button onclick="toggleDrawer(true)" class="w-10 h-10 rounded-lg bg-[#1a1f3a] hover:bg-[#242d4a] transition flex items-center justify-center">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>
     </button>
   </div>
-  <div class="flex px-4 pb-3 gap-2">
-    <button id="tab-private" onclick="switchTab('private')" class="flex-1 py-1.5 rounded-lg bg-[#2ea6ff] text-white text-xs font-semibold transition">👤 Clients</button>
-    <button id="tab-group" onclick="switchTab('group')" class="flex-1 py-1.5 rounded-lg bg-[#1c2733] text-[#8a9aa9] text-xs font-semibold transition">👥 Groups</button>
+  <div class="flex px-4 pb-4 gap-2">
+    <button id="tab-private" onclick="switchTab('private')" class="flex-1 py-2 rounded-lg gradient-accent text-white text-xs font-semibold transition glow-effect">👤 Clients</button>
+    <button id="tab-group" onclick="switchTab('group')" class="flex-1 py-2 rounded-lg bg-[#1a1f3a] hover:bg-[#242d4a] text-[#a0aec0] text-xs font-semibold transition">👥 Groups</button>
   </div>
 </header>
 
 <main id="inboxView" class="pb-20">
-  <div id="chatList" class="divide-y divide-[#232e3c]"></div>
-  <div id="emptyState" class="hidden text-center py-20 text-[#8a9aa9]">
+  <div id="chatList" class="divide-y divide-[#2d3748] px-2 py-2"></div>
+  <div id="emptyState" class="hidden text-center py-20 text-[#a0aec0]">
     <div class="text-5xl mb-3">💬</div>
     <div>No conversations yet</div>
   </div>
 </main>
 
-<div id="chatWindow" class="hidden fixed inset-0 z-40 bg-[#0f1419] flex flex-col">
-  <div class="flex items-center gap-3 px-4 py-3 bg-[#17212b] border-b border-[#232e3c]">
-    <button onclick="closeChat()" class="w-9 h-9 rounded-full bg-[#1c2733] flex items-center justify-center">
+<div id="chatWindow" class="hidden fixed inset-0 z-40 bg-[#0a0e27] flex flex-col">
+  <div class="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-[#111633] to-[#0a0e27] border-b border-[#2d3748]">
+    <button onclick="closeChat()" class="w-9 h-9 rounded-lg bg-[#1a1f3a] hover:bg-[#242d4a] flex items-center justify-center transition">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
-    <div id="chatHeaderAvatar" class="w-10 h-10 rounded-full bg-gradient-to-br from-[#2ea6ff] to-[#5288c1] flex items-center justify-center font-bold"></div>
+    <div id="chatHeaderAvatar" class="w-10 h-10 rounded-lg gradient-accent flex items-center justify-center font-bold text-sm glow-effect"></div>
     <div class="flex-1 min-w-0">
       <div id="chatHeaderName" class="text-sm font-semibold truncate"></div>
-      <div id="chatHeaderMeta" class="text-[11px] text-[#8a9aa9] truncate"></div>
+      <div id="chatHeaderMeta" class="text-[11px] text-[#a0aec0] truncate"></div>
     </div>
   </div>
-  <div id="messagesScroll" class="flex-1 overflow-y-auto px-3 py-3 space-y-2 scrollbar-hide"></div>
-  <form id="replyForm" class="flex items-center gap-2 px-3 py-3 bg-[#17212b] border-t border-[#232e3c]" onsubmit="sendReply(event)">
-    <input id="replyInput" type="text" placeholder="Write a message…" class="flex-1 bg-[#1c2733] border border-[#232e3c] rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#2ea6ff]">
-    <button type="submit" class="w-11 h-11 rounded-full bg-[#2ea6ff] hover:bg-[#1f8de0] flex items-center justify-center transition">
+  <div id="messagesScroll" class="flex-1 overflow-y-auto px-4 py-4 space-y-3 scrollbar-hide"></div>
+  <form id="replyForm" class="flex items-center gap-2 px-4 py-4 bg-gradient-to-t from-[#111633] to-[#0a0e27] border-t border-[#2d3748]" onsubmit="sendReply(event)">
+    <input id="replyInput" type="text" placeholder="Write a message…" class="flex-1 bg-[#1a1f3a] border border-[#2d3748] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#00d4ff] transition">
+    <button type="submit" class="w-11 h-11 rounded-lg gradient-accent hover:shadow-lg hover:shadow-[#00d4ff]/30 flex items-center justify-center transition">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
     </button>
   </form>
 </div>
 
 <div id="drawerBackdrop" class="backdrop fixed inset-0 z-40 bg-black/60" onclick="toggleDrawer(false)"></div>
-<aside id="drawer" class="drawer fixed top-0 right-0 z-50 h-full w-72 bg-[#17212b] border-l border-[#232e3c] p-5">
+<aside id="drawer" class="drawer fixed top-0 right-0 z-50 h-full w-72 bg-gradient-to-b from-[#111633] to-[#0a0e27] border-l border-[#2d3748] p-5">
   <div class="flex items-center gap-3 mb-6 pt-2">
-    <div class="w-14 h-14 rounded-full bg-gradient-to-br from-[#2ea6ff] to-[#5288c1] flex items-center justify-center font-bold text-xl" id="drawerAvatar">A</div>
+    <div class="w-14 h-14 rounded-xl gradient-accent flex items-center justify-center font-bold text-xl glow-effect" id="drawerAvatar">A</div>
     <div>
       <div id="drawerName" class="font-semibold">Admin</div>
-      <div class="text-[11px] text-[#8a9aa9]" id="drawerHandle">@jbhub</div>
+      <div class="text-[11px] text-[#a0aec0]" id="drawerHandle">@jbhub</div>
     </div>
   </div>
   <div class="space-y-2">
-    <button onclick="openAdminGate()" class="w-full flex items-center gap-3 bg-[#1c2733] hover:bg-[#243240] rounded-xl px-4 py-3 text-sm transition">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2ea6ff" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    <button onclick="openAdminGate()" class="w-full flex items-center gap-3 gradient-card hover:bg-[#1a2f4a] rounded-lg px-4 py-3 text-sm transition">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
       Open Admin Dashboard
     </button>
-    <button onclick="toggleDrawer(false)" class="w-full flex items-center gap-3 bg-[#1c2733] hover:bg-[#243240] rounded-xl px-4 py-3 text-sm transition">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a9aa9" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    <button onclick="toggleDrawer(false)" class="w-full flex items-center gap-3 bg-[#1a1f3a] hover:bg-[#242d4a] rounded-lg px-4 py-3 text-sm transition">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a0aec0" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       Close
     </button>
   </div>
-  <div class="absolute bottom-5 left-5 right-5 text-[11px] text-[#8a9aa9] text-center">v1.0 · Powered by Telegram WebApp</div>
+  <div class="absolute bottom-5 left-5 right-5 text-[11px] text-[#a0aec0] text-center">v1.0 · Powered by Telegram WebApp</div>
 </aside>
 
 <div id="adminGate" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center px-4">
-  <div class="bg-[#17212b] rounded-2xl p-6 w-full max-w-sm border border-[#232e3c]">
+  <div class="bg-gradient-to-br from-[#111633] to-[#0a0e27] rounded-2xl p-6 w-full max-w-sm border border-[#2d3748] glow-effect">
     <div class="text-center mb-4">
-      <div class="w-14 h-14 mx-auto rounded-full bg-[#2ea6ff]/20 flex items-center justify-center mb-3">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2ea6ff" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <div class="w-14 h-14 mx-auto rounded-lg gradient-accent/20 flex items-center justify-center mb-3 glow-effect">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
       </div>
       <h2 class="text-lg font-bold">Admin Access</h2>
-      <p class="text-[12px] text-[#8a9aa9]">Enter password to continue</p>
+      <p class="text-[12px] text-[#a0aec0]">Enter password to continue</p>
     </div>
-    <input id="adminPwd" type="password" placeholder="Password" class="w-full bg-[#1c2733] border border-[#232e3c] rounded-xl px-4 py-3 text-sm mb-3 focus:outline-none focus:border-[#2ea6ff]" onkeydown="if(event.key==='Enter') verifyAdmin()">
+    <input id="adminPwd" type="password" placeholder="Password" class="w-full bg-[#1a1f3a] border border-[#2d3748] rounded-lg px-4 py-3 text-sm mb-3 focus:outline-none focus:border-[#00d4ff] transition" onkeydown="if(event.key==='Enter') verifyAdmin()">
     <div id="adminErr" class="hidden text-red-400 text-[12px] mb-2">Incorrect password</div>
     <div class="flex gap-2">
-      <button onclick="closeAdminGate()" class="flex-1 py-2.5 rounded-xl bg-[#1c2733] text-sm">Cancel</button>
-      <button onclick="verifyAdmin()" class="flex-1 py-2.5 rounded-xl bg-[#2ea6ff] text-sm font-semibold">Unlock</button>
+      <button onclick="closeAdminGate()" class="flex-1 py-2.5 rounded-lg bg-[#1a1f3a] hover:bg-[#242d4a] text-sm transition">Cancel</button>
+      <button onclick="verifyAdmin()" class="flex-1 py-2.5 rounded-lg gradient-accent text-sm font-semibold transition">Unlock</button>
     </div>
   </div>
 </div>
 
-<div id="adminDash" class="hidden fixed inset-0 z-40 bg-[#0f1419] overflow-y-auto">
-  <header class="sticky top-0 z-10 bg-[#17212b] border-b border-[#232e3c] px-4 py-3 flex items-center justify-between">
+<div id="adminDash" class="hidden fixed inset-0 z-40 bg-[#0a0e27] overflow-y-auto">
+  <header class="sticky top-0 z-10 bg-gradient-to-r from-[#111633] to-[#0a0e27] border-b border-[#2d3748] px-4 py-3 flex items-center justify-between">
     <div class="flex items-center gap-2">
-      <button onclick="closeAdminDash()" class="w-9 h-9 rounded-full bg-[#1c2733] flex items-center justify-center">
+      <button onclick="closeAdminDash()" class="w-9 h-9 rounded-lg bg-[#1a1f3a] hover:bg-[#242d4a] flex items-center justify-center transition">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
       <h1 class="font-bold">Admin Dashboard</h1>
     </div>
-    <button onclick="openSpreadsheet()" class="bg-[#2ea6ff] hover:bg-[#1f8de0] text-white text-xs font-semibold px-3 py-2 rounded-lg transition">📊 To Add Data</button>
+    <button onclick="openSpreadsheet()" class="gradient-accent text-white text-xs font-semibold px-3 py-2 rounded-lg transition glow-effect">📊 To Add Data</button>
   </header>
 
   <section class="p-4">
-    <div class="rounded-xl bg-gradient-to-br from-[#2ea6ff] to-[#5288c1] p-4 shadow-md">
+    <div class="rounded-xl gradient-card p-5 shadow-lg glow-effect">
       <div class="flex items-center justify-between">
         <div>
-          <div class="text-[10px] opacity-80">Total Active Revenue</div>
-          <div class="text-2xl font-extrabold mt-1" id="walletTotal">—</div>
-          <div class="text-[11px] opacity-80 mt-1"><span id="walletCount">0</span> channels · All ads</div>
+          <div class="text-[11px] text-[#a0aec0] font-medium">Total Active Revenue</div>
+          <div class="text-3xl font-extrabold mt-2 text-[#00d4ff]" id="walletTotal">—</div>
+          <div class="text-[11px] text-[#a0aec0] mt-2"><span id="walletCount">0</span> channels · All ads</div>
         </div>
-        <button onclick="openWalletHistory()" class="bg-white/20 hover:bg-white/30 text-white text-xs px-3 py-2 rounded-lg transition">View History</button>
+        <button onclick="openWalletHistory()" class="bg-[#00d4ff]/20 hover:bg-[#00d4ff]/30 text-[#00d4ff] text-xs px-3 py-2 rounded-lg transition font-semibold">View History</button>
       </div>
     </div>
   </section>
 
-  <section class="px-4">
-    <div class="flex items-center justify-between mb-3">
+  <section class="px-4 py-2">
+    <div class="flex items-center justify-between mb-4">
       <h2 class="font-bold text-sm">Channels Inventory</h2>
-      <div id="pageIndicator" class="text-[12px] text-[#8a9aa9]">Page 1/3</div>
+      <div id="pageIndicator" class="text-[12px] text-[#a0aec0]">Page 1/3</div>
     </div>
-    <div class="overflow-hidden rounded-2xl bg-[#17212b] border border-[#232e3c]">
+    <div class="overflow-hidden rounded-xl bg-[#111633] border border-[#2d3748] glow-effect">
       <div id="slideTrack" class="slide-track"></div>
     </div>
     <div class="flex items-center justify-center gap-2 mt-4">
-      <button onclick="changePage(-1)" class="w-10 h-10 rounded-full bg-[#1c2733] hover:bg-[#243240] flex items-center justify-center">
+      <button onclick="changePage(-1)" class="w-10 h-10 rounded-lg bg-[#1a1f3a] hover:bg-[#242d4a] flex items-center justify-center transition">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
       <div id="dots" class="flex gap-2"></div>
-      <button onclick="changePage(1)" class="w-10 h-10 rounded-full bg-[#1c2733] hover:bg-[#243240] flex items-center justify-center">
+      <button onclick="changePage(1)" class="w-10 h-10 rounded-lg bg-[#1a1f3a] hover:bg-[#242d4a] flex items-center justify-center transition">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
     </div>
@@ -188,50 +210,50 @@
 </div>
 
 <div id="detailModal" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center px-3">
-  <div class="bg-[#17212b] rounded-2xl w-full max-w-md border border-[#232e3c] overflow-hidden fade-in">
-    <div class="relative h-40 bg-[#1c2733]" id="detailBanner">
-      <div class="absolute inset-0 flex items-center justify-center text-[#8a9aa9] text-xs" id="detailBannerLoader">Loading media…</div>
+  <div class="bg-gradient-to-br from-[#111633] to-[#0a0e27] rounded-2xl w-full max-w-md border border-[#2d3748] overflow-hidden fade-in glow-effect">
+    <div class="relative h-40 bg-[#1a1f3a]" id="detailBanner">
+      <div class="absolute inset-0 flex items-center justify-center text-[#a0aec0] text-xs" id="detailBannerLoader">Loading media…</div>
     </div>
     <div class="p-5">
       <div class="flex items-center gap-3 -mt-12 mb-4">
-        <div id="detailLogo" class="w-12 h-12 rounded-xl border-2 border-[#17212b] bg-[#1c2733] overflow-hidden flex items-center justify-center font-bold text-lg"></div>
+        <div id="detailLogo" class="w-12 h-12 rounded-lg border-2 border-[#111633] bg-gradient-accent overflow-hidden flex items-center justify-center font-bold text-lg glow-effect"></div>
         <div class="flex-1 mt-8 min-w-0">
           <h3 id="detailName" class="text-sm font-bold truncate"></h3>
-          <p id="detailLink" class="text-[11px] text-[#8a9aa9] truncate"></p>
+          <p id="detailLink" class="text-[11px] text-[#a0aec0] truncate"></p>
         </div>
       </div>
       <div class="space-y-2 mb-4 max-h-[300px] overflow-y-auto pr-1 scrollbar-hide">
         <div id="detailAdsGrid" class="grid grid-cols-1 gap-2"></div>
       </div>
       <div class="flex gap-2">
-        <button onclick="closeDetail()" class="flex-1 py-2.5 rounded-xl bg-[#1c2733] text-sm">Close</button>
-        <a id="detailViewBtn" href="#" target="_blank" class="flex-1 py-2.5 rounded-xl bg-[#2ea6ff] text-sm font-semibold text-center">View Channel</a>
+        <button onclick="closeDetail()" class="flex-1 py-2.5 rounded-lg bg-[#1a1f3a] hover:bg-[#242d4a] text-sm transition">Close</button>
+        <a id="detailViewBtn" href="#" target="_blank" class="flex-1 py-2.5 rounded-lg gradient-accent text-sm font-semibold text-center transition">View Channel</a>
       </div>
     </div>
   </div>
 </div>
 
 <div id="walletHistoryModal" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center px-3">
-  <div class="bg-[#17212b] rounded-2xl w-full max-w-md max-h-[80vh] border border-[#232e3c] flex flex-col">
-    <div class="flex items-center justify-between p-4 border-b border-[#232e3c]">
+  <div class="bg-gradient-to-br from-[#111633] to-[#0a0e27] rounded-2xl w-full max-w-md max-h-[80vh] border border-[#2d3748] flex flex-col glow-effect">
+    <div class="flex items-center justify-between p-4 border-b border-[#2d3748]">
       <h3 class="font-bold">Revenue History</h3>
-      <button onclick="closeWalletHistory()" class="w-8 h-8 rounded-full bg-[#1c2733]">✕</button>
+      <button onclick="closeWalletHistory()" class="w-8 h-8 rounded-lg bg-[#1a1f3a] hover:bg-[#242d4a] transition">✕</button>
     </div>
     <div id="walletHistoryList" class="flex-1 overflow-y-auto p-3 space-y-2 scrollbar-hide"></div>
   </div>
 </div>
 
-<div id="spreadsheetModal" class="hidden fixed inset-0 z-50 bg-[#0f1419]">
-  <div class="flex items-center justify-between p-3 border-b border-[#232e3c] bg-[#17212b]">
+<div id="spreadsheetModal" class="hidden fixed inset-0 z-50 bg-[#0a0e27]">
+  <div class="flex items-center justify-between p-3 border-b border-[#2d3748] bg-gradient-to-r from-[#111633] to-[#0a0e27]">
     <div class="flex items-center gap-2">
-      <button onclick="closeSpreadsheet()" class="w-9 h-9 rounded-full bg-[#1c2733]">
+      <button onclick="closeSpreadsheet()" class="w-9 h-9 rounded-lg bg-[#1a1f3a] hover:bg-[#242d4a] transition">
         <svg class="mx-auto" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
       <h3 class="font-bold text-sm">Ads Management Spreadsheet</h3>
     </div>
     <div class="flex gap-2">
-      <button onclick="addRow()" class="bg-[#2ea6ff] text-white text-xs font-semibold px-3 py-2 rounded-lg">+ Add Row</button>
-      <span id="saveIndicator" class="text-[11px] text-[#8a9aa9] self-center"></span>
+      <button onclick="addRow()" class="gradient-accent text-white text-xs font-semibold px-3 py-2 rounded-lg transition">+ Add Row</button>
+      <span id="saveIndicator" class="text-[11px] text-[#a0aec0] self-center"></span>
     </div>
   </div>
   <div class="overflow-auto h-[calc(100vh-56px)]">
@@ -269,250 +291,233 @@
 
 <script>
 const tg = window.Telegram.WebApp;
-tg.expand();
 tg.ready();
+tg.setHeaderColor('#111633');
 
-let currentTab = 'private';
+const ADMIN_PASSWORD = 'jbhub123';
 let adsCache = [];
-let currentPage = 0;
-const ITEMS_PER_PAGE = 8;
-let TOTAL_PAGES = 0;
 let currentChat = null;
+let currentTab = 'private';
+let currentPage = 0;
 
-async function api(path, opts={}) {
-  const r = await fetch(path, opts);
-  if (!r.ok) throw new Error(await r.text());
-  return r.json();
+async function api(url, opts={}) {
+  const res = await fetch(url, opts);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
 }
 
-function toast(m) { tg.showAlert(m); }
-function escapeHtml(s) { if(!s) return ''; return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function initials(n) { return (n||'').split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase(); }
-function avatarColor(n) {
-  const colors = ['#2ea6ff','#5288c1','#6b7c93','#4a90e2','#357abd'];
-  let hash = 0; for(let i=0; i<(n||'').length; i++) hash = (n.charCodeAt(i) + ((hash << 5) - hash));
-  return colors[Math.abs(hash) % colors.length];
-}
-function timeAgo(d) {
-  const s = Math.floor((new Date() - new Date(d)) / 1000);
-  if(s < 60) return 'just now';
-  if(s < 3600) return Math.floor(s/60) + 'm ago';
-  if(s < 86400) return Math.floor(s/3600) + 'h ago';
-  return Math.floor(s/86400) + 'd ago';
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
 }
 
-function toggleDrawer(open) {
-  document.getElementById('drawer').classList.toggle('open', open);
-  document.getElementById('drawerBackdrop').classList.toggle('show', open);
+function timeAgo(date) {
+  const d = new Date(date);
+  const now = new Date();
+  const secs = Math.floor((now - d) / 1000);
+  if (secs < 60) return 'just now';
+  if (secs < 3600) return Math.floor(secs/60) + 'm ago';
+  if (secs < 86400) return Math.floor(secs/3600) + 'h ago';
+  return Math.floor(secs/86400) + 'd ago';
 }
 
-function switchTab(t) {
-  currentTab = t;
-  document.getElementById('tab-private').className = `flex-1 py-2 rounded-xl text-sm font-semibold transition ${t==='private'?'bg-[#2ea6ff] text-white':'bg-[#1c2733] text-[#8a9aa9]'}`;
-  document.getElementById('tab-group').className = `flex-1 py-2 rounded-xl text-sm font-semibold transition ${t==='group'?'bg-[#2ea6ff] text-white':'bg-[#1c2733] text-[#8a9aa9]'}`;
-  loadChats();
+function toast(msg) {
+  const el = document.createElement('div');
+  el.textContent = msg;
+  el.className = 'fixed bottom-4 left-4 right-4 bg-[#1a1f3a] text-[#00d4ff] px-4 py-3 rounded-lg text-sm z-50 border border-[#2d3748]';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
 }
 
 async function loadChats() {
   try {
-    const chats = await api(`/api/chats?type=${currentTab}`);
+    const chats = await api('/api/chats?type=' + currentTab);
     const list = document.getElementById('chatList');
-    document.getElementById('emptyState').classList.toggle('hidden', chats.length > 0);
-    list.innerHTML = chats.map(c => `
-      <div onclick="openChat('${c.chat_id}')" class="flex items-center gap-3 px-4 py-3 hover:bg-[#1c2733] transition cursor-pointer">
-        <div class="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg" style="background:${avatarColor(c.customer_name)}">${initials(c.customer_name)}</div>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center justify-between mb-0.5">
-            <span class="font-semibold text-sm truncate">${escapeHtml(c.customer_name)}</span>
-            <span class="text-[10px] text-[#8a9aa9]">${timeAgo(c.updated_at)}</span>
+    if (!chats.length) {
+      document.getElementById('emptyState').classList.remove('hidden');
+      list.innerHTML = '';
+      return;
+    }
+    document.getElementById('emptyState').classList.add('hidden');
+    list.innerHTML = chats.map(chat => `
+      <div class="chat-item px-3 py-3 cursor-pointer" onclick="openChat(${chat.user_id})">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-lg gradient-accent flex items-center justify-center font-bold text-sm flex-shrink-0 glow-effect">${escapeHtml(chat.name).substring(0,2).toUpperCase()}</div>
+          <div class="flex-1 min-w-0">
+            <div class="font-semibold text-sm truncate">${escapeHtml(chat.name)}</div>
+            <div class="text-[12px] text-[#a0aec0] truncate">${escapeHtml(chat.last_message||'No messages')}</div>
           </div>
-          <div class="flex items-center justify-between">
-            <p class="text-[12px] text-[#8a9aa9] truncate pr-4">${escapeHtml(c.last_message)}</p>
-            ${c.unread_count > 0 ? `<span class="bg-[#2ea6ff] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">${c.unread_count}</span>` : ''}
-          </div>
+          <div class="text-[11px] text-[#a0aec0] flex-shrink-0">${timeAgo(chat.updated_at)}</div>
         </div>
       </div>
     `).join('');
-  } catch(e) { console.error(e); }
+  } catch (e) {
+    console.error(e);
+    toast('Failed to load chats');
+  }
 }
 
-async function openChat(id) {
-  currentChat = id;
-  const list = await api(`/api/chats?type=${currentTab}`);
-  const c = list.find(x=>x.chat_id === id);
-  document.getElementById('chatHeaderName').textContent = c.customer_name;
-  document.getElementById('chatHeaderMeta').textContent = c.username ? '@'+c.username : c.chat_id;
-  document.getElementById('chatHeaderAvatar').textContent = initials(c.customer_name);
-  document.getElementById('chatHeaderAvatar').style.background = avatarColor(c.customer_name);
-  document.getElementById('chatWindow').classList.remove('hidden');
-  loadMessages(id);
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tab-private').classList.toggle('gradient-accent', tab==='private');
+  document.getElementById('tab-private').classList.toggle('bg-[#1a1f3a]', tab!=='private');
+  document.getElementById('tab-group').classList.toggle('gradient-accent', tab==='group');
+  document.getElementById('tab-group').classList.toggle('bg-[#1a1f3a]', tab!=='group');
+  loadChats();
 }
 
-function closeChat() { currentChat = null; document.getElementById('chatWindow').classList.add('hidden'); loadChats(); }
-
-async function loadMessages(id) {
+async function openChat(userId) {
   try {
-    const msgs = await api(`/api/messages/${encodeURIComponent(id)}`);
+    currentChat = userId;
+    const chat = await api('/api/chat/' + userId);
+    document.getElementById('chatHeaderName').textContent = chat.name;
+    document.getElementById('chatHeaderMeta').textContent = timeAgo(chat.updated_at);
+    document.getElementById('chatHeaderAvatar').textContent = escapeHtml(chat.name).substring(0,2).toUpperCase();
+    
     const scroll = document.getElementById('messagesScroll');
-    scroll.innerHTML = msgs.map(m => {
-      const isAdmin = m.sender === 'admin';
-      return `
-        <div class="flex ${isAdmin?'justify-end':'justify-start'}">
-          <div class="max-w-[85%] px-3.5 py-2 text-sm shadow-sm ${isAdmin?'bubble-out':'bubble-in'}">
-            <div>${escapeHtml(m.message_text)}</div>
-            <div class="text-[9px] opacity-60 text-right mt-1">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>
-          </div>
-        </div>`;
-    }).join('');
+    scroll.innerHTML = chat.messages.map(msg => `
+      <div class="flex ${msg.direction==='out' ? 'justify-end' : 'justify-start'}">
+        <div class="bubble-${msg.direction} max-w-xs px-4 py-2 rounded-lg text-sm">${escapeHtml(msg.text)}</div>
+      </div>
+    `).join('');
     scroll.scrollTop = scroll.scrollHeight;
-  } catch(e) { console.error(e); }
+    
+    document.getElementById('chatWindow').classList.remove('hidden');
+  } catch (e) {
+    console.error(e);
+    toast('Failed to open chat');
+  }
+}
+
+function closeChat() {
+  currentChat = null;
+  document.getElementById('chatWindow').classList.add('hidden');
 }
 
 async function sendReply(e) {
   e.preventDefault();
   const input = document.getElementById('replyInput');
-  const txt = input.value.trim();
-  if(!txt || !currentChat) return;
+  const text = input.value.trim();
+  if (!text || !currentChat) return;
   input.value = '';
   try {
-    await api('/api/send-message', { method:'POST', body: JSON.stringify({ chat_id: currentChat, message_text: txt }) });
-    loadMessages(currentChat);
-  } catch(e) { toast('Send failed'); }
+    await api('/api/reply', { method:'POST', body: JSON.stringify({ user_id: currentChat, text }) });
+    await openChat(currentChat);
+  } catch (e) {
+    console.error(e);
+    toast('Failed to send message');
+  }
 }
 
-function openAdminGate() { toggleDrawer(false); document.getElementById('adminGate').classList.remove('hidden'); setTimeout(()=>document.getElementById('adminPwd').focus(), 100); }
-function closeAdminGate() { document.getElementById('adminGate').classList.add('hidden'); document.getElementById('adminPwd').value = ''; document.getElementById('adminErr').classList.add('hidden'); }
-async function verifyAdmin() {
+function toggleDrawer(show) {
+  document.getElementById('drawer').classList.toggle('open', show);
+  document.getElementById('drawerBackdrop').classList.toggle('show', show);
+}
+
+function openAdminGate() {
+  document.getElementById('adminGate').classList.remove('hidden');
+  document.getElementById('adminPwd').focus();
+}
+
+function closeAdminGate() {
+  document.getElementById('adminGate').classList.add('hidden');
+  document.getElementById('adminPwd').value = '';
+  document.getElementById('adminErr').classList.add('hidden');
+}
+
+function verifyAdmin() {
   const pwd = document.getElementById('adminPwd').value;
-  try {
-    const r = await api('/api/admin-auth', { method:'POST', body: JSON.stringify({ password: pwd }) });
-    if(r.ok) { closeAdminGate(); openAdminDash(); }
-    else { document.getElementById('adminErr').classList.remove('hidden'); }
-  } catch { document.getElementById('adminErr').classList.remove('hidden'); }
+  if (pwd === ADMIN_PASSWORD) {
+    closeAdminGate();
+    toggleDrawer(false);
+    openAdminDash();
+  } else {
+    document.getElementById('adminErr').classList.remove('hidden');
+  }
 }
 
-function openAdminDash() {
+async function openAdminDash() {
   document.getElementById('adminDash').classList.remove('hidden');
-  refreshAds();
-  refreshWallet();
-}
-function closeAdminDash() { document.getElementById('adminDash').classList.add('hidden'); }
-
-async function refreshWallet() {
-  try {
-    const w = await api('/api/wallet-summary');
-    document.getElementById('walletTotal').textContent = Number(w.total||0).toLocaleString() + ' MMK';
-    document.getElementById('walletCount').textContent = w.count;
-  } catch(e) {}
-}
-
-async function refreshAds() {
   try {
     adsCache = await api('/api/ads');
-    renderGrid();
-  } catch(e) {}
+    refreshAds();
+    refreshWallet();
+  } catch (e) {
+    console.error(e);
+    toast('Failed to load admin data');
+  }
 }
 
-function renderGrid() {
+function closeAdminDash() {
+  document.getElementById('adminDash').classList.add('hidden');
+}
+
+function refreshAds() {
+  const pages = Math.ceil(adsCache.length / 3);
   const track = document.getElementById('slideTrack');
+  track.innerHTML = Array.from({length: pages}, (_, p) => {
+    const items = adsCache.slice(p*3, p*3+3);
+    return `<div class="slide-page p-4 space-y-3">${items.map(item => `
+      <div class="bg-[#1a1f3a] rounded-lg p-3 cursor-pointer hover:bg-[#242d4a] transition" onclick="showDetail(${item.id})">
+        <div class="font-semibold text-sm mb-1">${escapeHtml(item.channel_name)}</div>
+        <div class="text-[11px] text-[#a0aec0]">${escapeHtml(item.ads1||'')} · ${escapeHtml(item.ads2||'')}</div>
+      </div>
+    `).join('')}</div>`;
+  }).join('');
+  
   const dots = document.getElementById('dots');
-  track.innerHTML = ''; dots.innerHTML = '';
-  TOTAL_PAGES = Math.ceil(adsCache.length / ITEMS_PER_PAGE) || 1;
-  if(currentPage >= TOTAL_PAGES) currentPage = TOTAL_PAGES - 1;
-
-  for(let p=0; p<TOTAL_PAGES; p++) {
-    const page = document.createElement('div');
-    page.className = 'slide-page grid grid-cols-2 gap-3 p-4';
-    const items = adsCache.slice(p*ITEMS_PER_PAGE, (p+1)*ITEMS_PER_PAGE);
-    for(const row of items) {
-      const bg = avatarColor(row.channel_name);
-      const ini = initials(row.channel_name);
-      const logo = row.logo_url 
-        ? `<img src="${escapeHtml(row.logo_url)}" alt="" class="w-full h-full object-cover" onerror="this.parentNode.innerHTML='<div class=\'w-full h-full flex items-center justify-center text-white font-bold text-lg\' style=\'background:${bg}\'>${ini}</div>'">`
-        : `<div class="w-full h-full flex items-center justify-center text-white font-bold text-lg" style="background:${bg}">${ini}</div>`;
-      page.innerHTML += `
-        <div onclick="openDetail(${row.id})" class="aspect-[3/4] rounded-xl bg-[#1c2733] overflow-hidden cursor-pointer hover:scale-[1.03] transition border border-[#232e3c]">
-          <div class="h-3/5 overflow-hidden">${logo}</div>
-          <div class="p-2">
-            <div class="text-[11px] font-semibold truncate">${escapeHtml(row.channel_name)}</div>
-            <div class="text-[10px] text-[#2ea6ff] mt-0.5">${(Number(row.ads1_fees||0)+Number(row.ads2_fees||0)+Number(row.ads3_fees||0)+Number(row.ads4_fees||0)).toLocaleString()} MMK</div>
-          </div>
-        </div>`;
-    }
-    track.appendChild(page);
-
-    const dot = document.createElement('button');
-    dot.className = `w-2.5 h-2.5 rounded-full ${p===currentPage?'bg-[#2ea6ff]':'bg-[#1c2733]'}`;
-    dot.onclick = () => { currentPage = p; updateSlide(); };
-    dots.appendChild(dot);
-  }
-  updateSlide();
+  dots.innerHTML = Array.from({length: pages}, (_, i) => `
+    <button onclick="changePage(${i-currentPage})" class="w-2 h-2 rounded-full ${i===currentPage ? 'bg-[#00d4ff]' : 'bg-[#2d3748]'} transition"></button>
+  `).join('');
+  
+  document.getElementById('pageIndicator').textContent = `Page ${currentPage+1}/${pages}`;
 }
 
-function updateSlide() {
-  document.getElementById('slideTrack').style.transform = `translateX(-${currentPage*100}%)`;
-  document.getElementById('pageIndicator').textContent = `Page ${currentPage+1}/${TOTAL_PAGES}`;
-  document.querySelectorAll('#dots button').forEach((d,i)=>{
-    d.className = `w-2.5 h-2.5 rounded-full ${i===currentPage?'bg-[#2ea6ff]':'bg-[#1c2733]'}`;
-  });
-}
-function changePage(delta) {
-  currentPage = Math.max(0, Math.min(TOTAL_PAGES-1, currentPage+delta));
-  updateSlide();
+function refreshWallet() {
+  const total = adsCache.reduce((sum, r) => sum + (Number(r.ads1_fees||0)+Number(r.ads2_fees||0)+Number(r.ads3_fees||0)+Number(r.ads4_fees||0)), 0);
+  document.getElementById('walletTotal').textContent = total.toLocaleString() + ' MMK';
+  document.getElementById('walletCount').textContent = adsCache.length;
 }
 
-async function openDetail(id) {
-  const row = adsCache.find(r=>r.id===id);
+function changePage(dir) {
+  const pages = Math.ceil(adsCache.length / 3);
+  currentPage = Math.max(0, Math.min(pages-1, currentPage + dir));
+  const offset = currentPage * 100;
+  document.getElementById('slideTrack').style.transform = `translateX(-${offset}%)`;
+  refreshAds();
+}
+
+async function showDetail(id) {
+  const row = adsCache.find(r => r.id === id);
   if (!row) return;
-  document.getElementById('detailName').textContent = row.channel_name;
-  document.getElementById('detailLink').textContent = row.telegram_link || '';
-  document.getElementById('detailViewBtn').href = row.telegram_link || '#';
-
+  
+  document.getElementById('detailName').textContent = escapeHtml(row.channel_name);
+  document.getElementById('detailLink').textContent = escapeHtml(row.telegram_link);
+  document.getElementById('detailViewBtn').href = escapeHtml(row.telegram_link);
+  
   const grid = document.getElementById('detailAdsGrid');
-  grid.innerHTML = '';
-  for(let i=1; i<=4; i++) {
+  grid.innerHTML = [1,2,3,4].map(i => {
     const name = row[`ads${i}`];
-    const fee = row[`ads${i}_fees`];
-    const duration = row[`ads${i}_duration`];
-    const posts = row[`ads${i}_posts`];
-    if(name || fee || duration || posts) {
-      grid.innerHTML += `
-        <div class="bg-[#1c2733] rounded-lg px-3 py-2 flex items-center justify-between gap-2 border border-[#232e3c]">
-          <div class="flex-1 min-w-0">
-            <div class="text-[11px] font-bold text-[#2ea6ff] truncate">${escapeHtml(name || `Ads ${i}`)}</div>
-            <div class="flex items-center gap-2 mt-0.5">
-              <span class="text-[10px] font-semibold text-white">${Number(fee||0).toLocaleString()} MMK</span>
-              <span class="text-[10px] text-[#8a9aa9]">•</span>
-              <span class="text-[10px] text-[#8a9aa9]">${escapeHtml(duration||'—')}</span>
-            </div>
-          </div>
-          ${posts ? `<a href="${escapeHtml(posts)}" target="_blank" class="shrink-0 bg-[#2ea6ff] hover:bg-[#1f8de0] text-white text-[10px] font-bold px-2.5 py-1 rounded-md transition">Post</a>` : ''}
-        </div>`;
-    }
-  }
-
-  const logo = document.getElementById('detailLogo');
-  if (row.logo_url) {
-    logo.innerHTML = `<img src="${escapeHtml(row.logo_url)}" alt="" class="w-full h-full object-cover" onerror="this.parentNode.innerHTML='<span>${initials(row.channel_name)}</span>'">`;
-  } else {
-    logo.innerHTML = `<span>${initials(row.channel_name)}</span>`;
-    logo.style.background = avatarColor(row.channel_name);
-  }
-
+    const fees = row[`ads${i}_fees`];
+    if (!name) return '';
+    return `<div class="bg-[#1a1f3a] rounded-lg p-2"><div class="text-xs font-semibold">${escapeHtml(name)}</div><div class="text-[10px] text-[#a0aec0]">${fees} MMK</div></div>`;
+  }).join('');
+  
   const banner = document.getElementById('detailBanner');
-  banner.innerHTML = `<div class="absolute inset-0 flex items-center justify-center text-[#8a9aa9] text-xs">Loading media…</div>`;
+  banner.innerHTML = `<div class="absolute inset-0 flex items-center justify-center text-[#a0aec0] text-xs" id="detailBannerLoader">Loading media…</div>`;
 
   if (row.telegram_file_id) {
     try {
       const r = await api(`/api/get-media-url/${encodeURIComponent(row.telegram_file_id)}`);
       if (r.url) banner.innerHTML = `<img src="${r.url}" alt="" class="w-full h-full object-cover">`;
     } catch {
-      banner.innerHTML = `<div class="absolute inset-0 flex items-center justify-center text-[#8a9aa9] text-xs">Failed to resolve</div>`;
+      banner.innerHTML = `<div class="absolute inset-0 flex items-center justify-center text-[#a0aec0] text-xs">Failed to resolve</div>`;
     }
   } else if (row.logo_url) {
     banner.innerHTML = `<img src="${escapeHtml(row.logo_url)}" alt="" class="w-full h-full object-cover opacity-60">`;
   } else {
-    banner.innerHTML = `<div class="absolute inset-0 flex items-center justify-center text-[#8a9aa9] text-xs">No media uploaded</div>`;
+    banner.innerHTML = `<div class="absolute inset-0 flex items-center justify-center text-[#a0aec0] text-xs">No media uploaded</div>`;
   }
 
   document.getElementById('detailModal').classList.remove('hidden');
@@ -522,22 +527,22 @@ function closeDetail() { document.getElementById('detailModal').classList.add('h
 async function openWalletHistory() {
   document.getElementById('walletHistoryModal').classList.remove('hidden');
   const list = document.getElementById('walletHistoryList');
-  list.innerHTML = `<div class="text-center text-[#8a9aa9] text-xs py-8">Loading…</div>`;
+  list.innerHTML = `<div class="text-center text-[#a0aec0] text-xs py-8">Loading…</div>`;
   try {
     const rows = await api('/api/wallet-history');
     list.innerHTML = rows.map(r => {
       const sum = Number(r.ads1_fees||0)+Number(r.ads2_fees||0)+Number(r.ads3_fees||0)+Number(r.ads4_fees||0);
-      return `<div class="bg-[#1c2733] rounded-xl p-3 flex items-center justify-between">
+      return `<div class="bg-[#1a1f3a] rounded-lg p-3 flex items-center justify-between hover:bg-[#242d4a] transition">
         <div class="min-w-0">
           <div class="font-semibold text-sm truncate">${escapeHtml(r.channel_name)}</div>
-          <div class="text-[11px] text-[#8a9aa9] truncate">${escapeHtml(r.ads1||'')} · ${escapeHtml(r.ads2||'')}</div>
+          <div class="text-[11px] text-[#a0aec0] truncate">${escapeHtml(r.ads1||'')} · ${escapeHtml(r.ads2||'')}</div>
         </div>
         <div class="text-right ml-2">
-          <div class="text-[#2ea6ff] font-bold">${sum.toLocaleString()} MMK</div>
-          <div class="text-[10px] text-[#8a9aa9]">${timeAgo(r.updated_at)}</div>
+          <div class="text-[#00d4ff] font-bold">${sum.toLocaleString()} MMK</div>
+          <div class="text-[10px] text-[#a0aec0]">${timeAgo(r.updated_at)}</div>
         </div>
       </div>`;
-    }).join('') || '<div class="text-center text-[#8a9aa9] text-xs py-8">No data</div>';
+    }).join('') || '<div class="text-center text-[#a0aec0] text-xs py-8">No data</div>';
   } catch { list.innerHTML = '<div class="text-center text-red-400 text-xs py-8">Failed</div>'; }
 }
 function closeWalletHistory() { document.getElementById('walletHistoryModal').classList.add('hidden'); }
@@ -549,7 +554,7 @@ function renderSheet() {
   const body = document.getElementById('sheetBody');
   body.innerHTML = adsCache.map((r,idx) => `
     <tr data-id="${r.id}">
-      <td class="sheet-cell text-center text-[#8a9aa9] px-2">${idx+1}</td>
+      <td class="sheet-cell text-center text-[#a0aec0] px-2">${idx+1}</td>
       <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.channel_name||'')}" onchange="updateCellDatabase(${r.id},'channel_name',this.value)"></td>
       <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.telegram_link||'')}" onchange="updateCellDatabase(${r.id},'telegram_link',this.value)"></td>
       <td class="sheet-cell"><input class="sheet-input" value="${escapeHtml(r.logo_url||'')}" onchange="updateCellDatabase(${r.id},'logo_url',this.value)"></td>
