@@ -394,9 +394,33 @@ async function openChat(chatId) {
     const scroll = document.getElementById('messagesScroll');
     scroll.innerHTML = messages.map(msg => {
       const isAdmin = msg.sender === 'admin';
+      let mediaHtml = '';
+      
+      // Render media if present
+      if (msg.media_url) {
+        if (msg.media_type === 'photo') {
+          mediaHtml = `<img src="${escapeHtml(msg.media_url)}" alt="Photo" class="max-w-xs rounded-lg mb-2 cursor-pointer" onclick="openMediaViewer('${escapeHtml(msg.media_url)}', 'photo')" />`;
+        } else if (msg.media_type === 'video') {
+          mediaHtml = `<video src="${escapeHtml(msg.media_url)}" controls class="max-w-xs rounded-lg mb-2" style="max-height: 300px;"></video>`;
+        } else if (msg.media_type === 'audio' || msg.media_type === 'voice') {
+          mediaHtml = `<audio src="${escapeHtml(msg.media_url)}" controls class="mb-2" style="width: 100%; max-width: 300px;"></audio>`;
+        } else if (msg.media_type === 'animation') {
+          mediaHtml = `<img src="${escapeHtml(msg.media_url)}" alt="Animation" class="max-w-xs rounded-lg mb-2" />`;
+        } else if (msg.media_type === 'document') {
+          const fileName = msg.media_file_name || 'Document';
+          mediaHtml = `<a href="${escapeHtml(msg.media_url)}" target="_blank" class="flex items-center gap-2 bg-[#1a2f4a] hover:bg-[#1f3a52] rounded-lg px-3 py-2 mb-2 text-xs transition">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span class="truncate">${escapeHtml(fileName)}</span>
+          </a>`;
+        }
+      }
+      
       return `
         <div class="flex ${isAdmin ? 'justify-end' : 'justify-start'}">
-          <div class="bubble-${isAdmin ? 'out' : 'in'} max-w-xs px-4 py-2 rounded-lg text-sm">${escapeHtml(msg.message_text)}</div>
+          <div class="bubble-${isAdmin ? 'out' : 'in'} max-w-xs px-4 py-2 rounded-lg text-sm">
+            ${mediaHtml}
+            <div>${escapeHtml(msg.message_text)}</div>
+          </div>
         </div>
       `;
     }).join('');
@@ -412,6 +436,22 @@ async function openChat(chatId) {
 function closeChat() {
   currentChat = null;
   document.getElementById('chatWindow').classList.add('hidden');
+}
+
+function openMediaViewer(url, type) {
+  const viewer = document.getElementById('mediaViewer') || createMediaViewer();
+  const content = viewer.querySelector('#mediaViewerContent');
+  content.innerHTML = '<img src="' + escapeHtml(url) + '" alt="Media" class="max-w-full max-h-full object-contain" />';
+  viewer.classList.remove('hidden');
+}
+
+function createMediaViewer() {
+  const viewer = document.createElement('div');
+  viewer.id = 'mediaViewer';
+  viewer.className = 'hidden fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4';
+  viewer.innerHTML = '<div class="relative w-full h-full flex items-center justify-center"><button onclick="document.getElementById(\'mediaViewer\').classList.add(\'hidden\')" class="absolute top-4 right-4 w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center transition"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button><div id="mediaViewerContent" class="flex items-center justify-center"></div></div>';
+  document.body.appendChild(viewer);
+  return viewer;
 }
 
 async function sendReply(e) {
