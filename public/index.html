@@ -60,8 +60,8 @@
     <div class="flex items-center gap-2">
       <div class="w-9 h-9 rounded-full bg-gradient-to-br from-[#2ea6ff] to-[#5288c1] flex items-center justify-center font-bold">JB</div>
       <div>
-        <div class="text-sm font-semibold">JB Hub</div>
-        <div class="text-[11px] text-[#8a9aa9]" id="onlineStatus">Live chat router</div>
+        <div class="text-xs font-semibold">JB Hub</div>
+        <div class="text-[10px] text-[#8a9aa9]" id="onlineStatus">Live chat router</div>
       </div>
     </div>
     <button onclick="toggleDrawer(true)" class="w-10 h-10 rounded-full bg-[#1c2733] flex items-center justify-center hover:bg-[#243240] transition">
@@ -69,8 +69,8 @@
     </button>
   </div>
   <div class="flex px-4 pb-3 gap-2">
-    <button id="tab-private" onclick="switchTab('private')" class="flex-1 py-2 rounded-xl bg-[#2ea6ff] text-white text-sm font-semibold transition">👤 Clients</button>
-    <button id="tab-group" onclick="switchTab('group')" class="flex-1 py-2 rounded-xl bg-[#1c2733] text-[#8a9aa9] text-sm font-semibold transition">👥 Groups</button>
+    <button id="tab-private" onclick="switchTab('private')" class="flex-1 py-1.5 rounded-lg bg-[#2ea6ff] text-white text-xs font-semibold transition">👤 Clients</button>
+    <button id="tab-group" onclick="switchTab('group')" class="flex-1 py-1.5 rounded-lg bg-[#1c2733] text-[#8a9aa9] text-xs font-semibold transition">👥 Groups</button>
   </div>
 </header>
 
@@ -154,11 +154,11 @@
   </header>
 
   <section class="p-4">
-    <div class="rounded-2xl bg-gradient-to-br from-[#2ea6ff] to-[#5288c1] p-5 shadow-lg">
+    <div class="rounded-xl bg-gradient-to-br from-[#2ea6ff] to-[#5288c1] p-4 shadow-md">
       <div class="flex items-center justify-between">
         <div>
-          <div class="text-[12px] opacity-80">Total Active Revenue</div>
-          <div class="text-3xl font-extrabold mt-1" id="walletTotal">—</div>
+          <div class="text-[10px] opacity-80">Total Active Revenue</div>
+          <div class="text-2xl font-extrabold mt-1" id="walletTotal">—</div>
           <div class="text-[11px] opacity-80 mt-1"><span id="walletCount">0</span> channels · All ads</div>
         </div>
         <button onclick="openWalletHistory()" class="bg-white/20 hover:bg-white/30 text-white text-xs px-3 py-2 rounded-lg transition">View History</button>
@@ -194,9 +194,9 @@
     </div>
     <div class="p-5">
       <div class="flex items-center gap-3 -mt-12 mb-4">
-        <div id="detailLogo" class="w-16 h-16 rounded-2xl border-4 border-[#17212b] bg-[#1c2733] overflow-hidden flex items-center justify-center font-bold text-xl"></div>
+        <div id="detailLogo" class="w-12 h-12 rounded-xl border-2 border-[#17212b] bg-[#1c2733] overflow-hidden flex items-center justify-center font-bold text-lg"></div>
         <div class="flex-1 mt-8 min-w-0">
-          <h3 id="detailName" class="font-bold truncate"></h3>
+          <h3 id="detailName" class="text-sm font-bold truncate"></h3>
           <p id="detailLink" class="text-[11px] text-[#8a9aa9] truncate"></p>
         </div>
       </div>
