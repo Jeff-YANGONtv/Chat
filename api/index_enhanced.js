@@ -20,7 +20,7 @@ const TELEGRAM_CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID;
 const BOT_TOKEN_1         = process.env.BOT_TOKEN_1;
 const BOT_TOKEN_2         = process.env.BOT_TOKEN_2;
 const BOT_TOKEN_3         = process.env.BOT_TOKEN_3;
-const ADMIN_PASSWORD      = process.env.ADMIN_PASSWORD || 'JB2026@ADMIN';
+const ADMIN_PASSWORD      = process.env.ADMIN_PASSWORD || '036324';
 
 const BOT_TOKENS = { bot1: BOT_TOKEN_1, bot2: BOT_TOKEN_2, bot3: BOT_TOKEN_3 };
 
